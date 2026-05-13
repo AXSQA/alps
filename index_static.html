@@ -6,1280 +6,1525 @@
   <title>Implementation Readiness Platform (Static)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="checklist_config.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .view { display: none; }
     .view.active { display: block; }
     .row-flash { background-color: #eff6ff !important; box-shadow: 0 0 0 2px #60a5fa inset; border-radius: 0.5rem; }
     .row-flash-fade { background-color: transparent; box-shadow: none; transition: background-color 0.7s ease, box-shadow 0.7s ease; }
+    .group-tab.active { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+    .group-tab { transition: background 0.15s, color 0.15s; }
+    .gate-pill { transition: background 0.15s, color 0.15s, border-color 0.15s; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 text-sm">
 
-  <!-- VIEW 1: DASHBOARD -->
-  <div id="view-dashboard" class="view active">
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-        </div>
-        <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
+<!-- ═══════════════════════════════════════════════════════════════
+     VIEW 1 · DASHBOARD
+═══════════════════════════════════════════════════════════════ -->
+<div id="view-dashboard" class="view active">
+  <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
       </div>
-      <button onclick="showView('create')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">+ New Request</button>
-    </nav>
-    <main class="max-w-6xl mx-auto px-6 py-8">
-      <h1 class="text-xl font-semibold text-gray-900 mb-1">Project Dashboard</h1>
-      <p class="text-gray-500 mb-6">Track readiness status across all feature requests.</p>
-      <div class="flex flex-wrap gap-3 mb-8">
-        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2">
-          <span class="text-gray-500">Total</span>
-          <span class="font-semibold text-gray-900" id="dash-total-chip">4 Requests</span>
-        </div>
-        <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-green-500"></span>
-          <span class="font-semibold text-green-700" id="dash-ready-chip">1 Ready</span>
-        </div>
-        <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          <span class="font-semibold text-amber-700" id="dash-inprogress-chip">2 In Progress</span>
-        </div>
-        <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-red-500"></span>
-          <span class="font-semibold text-red-700" id="dash-blocked-chip">1 Blocked</span>
-        </div>
-      </div>
-      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table class="w-full">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature</th>
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Stage</th>
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Progress</th>
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Owner</th>
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Risk</th>
-              <th class="px-5 py-3"></th>
-            </tr>
-          </thead>
-          <tbody id="dashboard-tbody" class="divide-y divide-gray-100"></tbody>
-        </table>
-      </div>
-    </main>
-  </div>
-
-  <!-- VIEW 2: CREATE REQUEST -->
-  <div id="view-create" class="view">
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-        </div>
-        <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
-      </div>
-    </nav>
-    <main class="max-w-2xl mx-auto px-6 py-10">
-      <div class="mb-6">
-        <h1 class="text-xl font-semibold text-gray-900 mb-1">New Readiness Request</h1>
-        <p class="text-gray-500">Fill in the details below to kick off a readiness review.</p>
-      </div>
-      <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Feature Title <span class="text-red-500">*</span></label>
-          <input id="create-title" type="text" placeholder="e.g. SSO Integration" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Business Goal <span class="text-red-500">*</span></label>
-          <textarea id="create-goal" rows="3" placeholder="Describe the business objective this feature addresses..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Success Metrics <span class="text-red-500">*</span></label>
-          <input id="create-metrics" type="text" placeholder="e.g. Reduce login time by 40%, 95% adoption in 30 days" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Owner <span class="text-red-500">*</span></label>
-            <select id="create-owner" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-              <option value="">Select owner...</option>
-              <option>Priya S.</option>
-              <option>James K.</option>
-              <option>Aisha M.</option>
-              <option>Tom R.</option>
-              <option>Dana L.</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Target Quarter <span class="text-red-500">*</span></label>
-            <select id="create-quarter" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-              <option value="">Select quarter...</option>
-              <option>Q1 2026</option>
-              <option>Q2 2026</option>
-              <option>Q3 2026</option>
-              <option>Q4 2026</option>
-            </select>
-          </div>
-        </div>
-        <div id="create-error" class="hidden text-red-600 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2">Please fill in all required fields before submitting.</div>
-        <div class="flex gap-3 pt-2">
-          <button onclick="submitCreateRequest()" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Start Readiness Review →</button>
-          <button onclick="showView('dashboard')" class="bg-white text-gray-600 border border-gray-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Cancel</button>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- VIEW 3: WORKFLOW -->
-  <div id="view-workflow" class="view">
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-        </div>
-        <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
-      </div>
-      <button onclick="showView('dashboard')" class="text-gray-500 hover:text-gray-800 text-sm font-medium">← Dashboard</button>
-    </nav>
-    <div class="bg-white border-b border-gray-100 px-6 py-2.5 text-xs text-gray-500 flex items-center gap-1.5">
-      <span id="wf-breadcrumb-title" class="font-medium text-gray-700">Feature</span>
-      <span>›</span>
-      <span id="bc-business" class="cursor-pointer hover:text-blue-600" onclick="switchStage('business')">Business</span>
-      <span id="bc-sep1">→</span>
-      <span id="bc-product" class="cursor-pointer hover:text-blue-600" onclick="switchStage('product')">Product</span>
-      <span id="bc-sep2">→</span>
-      <span id="bc-tech" class="cursor-pointer hover:text-blue-600" onclick="switchStage('tech')">Tech</span>
-      <span id="bc-sep3">→</span>
-      <span id="bc-execution" class="cursor-pointer hover:text-blue-600" onclick="switchStage('execution')">Execution</span>
+      <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
     </div>
-    <div class="flex h-[calc(100vh-105px)] overflow-hidden">
-      <!-- Stage Nav Sidebar -->
-      <aside class="w-52 bg-white border-r border-gray-200 p-4 flex flex-col gap-2 shrink-0">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Stages</p>
-        <button id="nav-business" onclick="switchStage('business')" class="stage-nav-btn text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition-colors">
-          <span>Business</span>
-          <span id="nav-badge-business" class="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">—</span>
+    <button onclick="showView('create')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">+ New Request</button>
+  </nav>
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <h1 class="text-xl font-semibold text-gray-900 mb-1">Project Dashboard</h1>
+    <p class="text-gray-500 mb-6">Track readiness status across all feature requests.</p>
+    <div class="flex flex-wrap gap-3 mb-8">
+      <div class="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2">
+        <span class="text-gray-500">Total</span>
+        <span class="font-semibold text-gray-900" id="dash-total-chip">4 Requests</span>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        <span class="font-semibold text-green-700" id="dash-ready-chip">1 Ready</span>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span class="font-semibold text-amber-700" id="dash-inprogress-chip">2 In Progress</span>
+      </div>
+      <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+        <span class="font-semibold text-red-700" id="dash-blocked-chip">1 Blocked</span>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature</th>
+            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Active Gate</th>
+            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Progress</th>
+            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Owner</th>
+            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Risk</th>
+            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Sign-off Mode</th>
+            <th class="px-5 py-3"></th>
+          </tr>
+        </thead>
+        <tbody id="dashboard-tbody" class="divide-y divide-gray-100"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VIEW 2 · CREATE REQUEST
+═══════════════════════════════════════════════════════════════ -->
+<div id="view-create" class="view">
+  <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      </div>
+      <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
+    </div>
+    <button onclick="showView('dashboard')" class="text-gray-500 hover:text-gray-800 text-sm font-medium">← Dashboard</button>
+  </nav>
+  <main class="max-w-2xl mx-auto px-6 py-10">
+    <div class="mb-6">
+      <h1 class="text-xl font-semibold text-gray-900 mb-1">New Readiness Request</h1>
+      <p class="text-gray-500">Fill in the details below to kick off a readiness review.</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Title <span class="text-red-500">*</span></label>
+        <input id="create-title" type="text" placeholder="e.g. SSO Integration" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Business Goal <span class="text-red-500">*</span></label>
+        <textarea id="create-goal" rows="3" placeholder="Describe the business objective this feature addresses..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Success Metrics <span class="text-red-500">*</span></label>
+        <input id="create-metrics" type="text" placeholder="e.g. Reduce login time by 40%, 95% adoption in 30 days" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Owner <span class="text-red-500">*</span></label>
+          <select id="create-owner" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+            <option value="">Select owner...</option>
+            <option>Priya S.</option>
+            <option>James K.</option>
+            <option>Aisha M.</option>
+            <option>Tom R.</option>
+            <option>Dana L.</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Target Quarter <span class="text-red-500">*</span></label>
+          <select id="create-quarter" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+            <option value="">Select quarter...</option>
+            <option>Q1 2026</option>
+            <option>Q2 2026</option>
+            <option>Q3 2026</option>
+            <option>Q4 2026</option>
+          </select>
+        </div>
+      </div>
+      <!-- Sign-off Mode -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Group Completion Mode <span class="text-red-500">*</span></label>
+        <p class="text-xs text-gray-400 mb-3">Controls how sub-groups are marked complete across all gates in this request.</p>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="relative flex items-start gap-3 border rounded-xl p-4 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+            <input type="radio" name="signoff-mode" value="auto" checked class="mt-0.5 text-blue-600 focus:ring-blue-500" />
+            <div>
+              <p class="text-sm font-medium text-gray-800">Auto-detect</p>
+              <p class="text-xs text-gray-500 mt-0.5">Group marked complete automatically when all required items are checked.</p>
+            </div>
+          </label>
+          <label class="relative flex items-start gap-3 border rounded-xl p-4 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+            <input type="radio" name="signoff-mode" value="manual" class="mt-0.5 text-blue-600 focus:ring-blue-500" />
+            <div>
+              <p class="text-sm font-medium text-gray-800">Manual sign-off</p>
+              <p class="text-xs text-gray-500 mt-0.5">A "Sign off group" button appears — someone must explicitly approve each group.</p>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div id="create-error" class="hidden text-red-600 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2">Please fill in all required fields before submitting.</div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="submitCreateRequest()" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Start Readiness Review →</button>
+        <button onclick="showView('dashboard')" class="bg-white text-gray-600 border border-gray-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Cancel</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VIEW 3 · WORKFLOW — nav + sidebar
+═══════════════════════════════════════════════════════════════ -->
+<div id="view-workflow" class="view">
+  <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      </div>
+      <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span id="wf-signoff-mode-badge" class="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 font-medium border border-gray-200"></span>
+      <button onclick="showView('progress')" class="text-xs bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg font-medium hover:bg-gray-200 transition-colors">Progress ↗</button>
+      <button onclick="showView('summary')" class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-100 transition-colors">View Summary →</button>
+      <button onclick="showView('dashboard')" class="text-gray-500 hover:text-gray-800 text-sm font-medium">← Dashboard</button>
+    </div>
+  </nav>
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b border-gray-100 px-6 py-2 text-xs text-gray-500 flex items-center gap-1.5 flex-wrap">
+    <span id="wf-breadcrumb-title" class="font-medium text-gray-700">Feature</span>
+    <span class="text-gray-300">›</span>
+    <span id="bc-gate" class="font-medium text-blue-700"></span>
+    <span id="bc-group-sep" class="text-gray-300">›</span>
+    <span id="bc-group" class="text-gray-500"></span>
+  </div>
+  <!-- Gate pill bar -->
+  <div id="gate-bar" class="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-2 flex-wrap"></div>
+  <div class="flex h-[calc(100vh-155px)] overflow-hidden">
+    <!-- Mini group progress sidebar -->
+    <aside id="gate-group-sidebar" class="w-44 bg-white border-r border-gray-200 flex flex-col shrink-0 overflow-y-auto">
+      <div class="px-3 pt-3 pb-1">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Groups</p>
+      </div>
+      <div id="mini-group-list" class="flex-1 px-2 py-1 space-y-0.5"></div>
+    </aside>
+    <!-- Main checklist area -->
+    <main class="flex-1 min-w-0 overflow-y-auto">
+      <!-- Group tabs bar -->
+      <div id="group-tabs-bar" class="bg-white border-b border-gray-200 px-6 pt-4 flex gap-2 flex-wrap"></div>
+      <!-- Checklist panels (one per group, shown/hidden by tab) -->
+      <div id="checklist-area" class="p-6"></div>
+      <!-- Execution panel -->
+      <div id="stage-execution" class="hidden p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Execution</h2>
+            <div class="flex items-center gap-2 mt-1">
+              <span id="badge-execution" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Not Started</span>
+              <span class="text-gray-400 text-xs">Ticket tracker</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <span id="exec-sprint-label" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full font-medium"></span>
+            <span>Est. completion: <span id="exec-est-completion" class="font-medium text-gray-700"></span></span>
+            <button id="exec-refresh-btn" onclick="refreshTickets()" class="ml-2 flex items-center gap-1 text-xs font-medium text-gray-500 border border-gray-200 rounded-lg px-2.5 py-1 hover:bg-gray-50 hover:text-gray-700 transition-colors">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-3 mb-5">
+          <div class="bg-white border border-gray-200 rounded-lg px-4 py-2.5"><div class="text-lg font-bold text-gray-900" id="exec-pct">0%</div><div class="text-xs text-gray-400">Complete</div></div>
+          <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span><div><div class="text-lg font-bold text-green-700" id="exec-count-done">0</div><div class="text-xs text-green-600">Done</div></div></div>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span><div><div class="text-lg font-bold text-blue-700" id="exec-count-inprogress">0</div><div class="text-xs text-blue-600">In Progress</div></div></div>
+          <div class="bg-purple-50 border border-purple-200 rounded-lg px-4 py-2.5 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-500 shrink-0"></span><div><div class="text-lg font-bold text-purple-700" id="exec-count-inreview">0</div><div class="text-xs text-purple-600">In Review</div></div></div>
+          <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span><div><div class="text-lg font-bold text-amber-700" id="exec-count-onhold">0</div><div class="text-xs text-amber-600">On Hold</div></div></div>
+          <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span><div><div class="text-lg font-bold text-red-700" id="exec-count-blocked">0</div><div class="text-xs text-red-600">Blocked</div></div></div>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-400 shrink-0"></span><div><div class="text-lg font-bold text-gray-600" id="exec-count-new">0</div><div class="text-xs text-gray-500">New</div></div></div>
+        </div>
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs text-gray-500 font-medium">Overall Progress</span>
+            <span class="text-xs text-gray-700 font-semibold" id="exec-pct-bar-label">0%</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-2.5">
+            <div id="exec-progress-bar" class="bg-green-500 h-2.5 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">#</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Title</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide w-32">Assignee</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide w-32">Status</th>
+              </tr>
+            </thead>
+            <tbody id="exec-ticket-rows" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+    <!-- AI Auditor Panel -->
+    <aside id="ai-panel" class="w-80 bg-white border-l border-gray-200 flex flex-col shrink-0">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">✦</div>
+          <div>
+            <p class="font-semibold text-gray-800 text-sm leading-none">AI Auditor</p>
+            <p class="text-xs text-green-500 mt-0.5">Online</p>
+          </div>
+        </div>
+        <button onclick="toggleAIPanel()" class="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors" title="Collapse">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
-        <button id="nav-product" onclick="switchStage('product')" class="stage-nav-btn text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition-colors">
-          <span class="flex items-center gap-1.5"><span id="lock-product">🔒</span> Product</span>
-          <span id="nav-badge-product" class="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">—</span>
-        </button>
-        <button id="nav-tech" onclick="switchStage('tech')" class="stage-nav-btn text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition-colors">
-          <span class="flex items-center gap-1.5"><span id="lock-tech">🔒</span> Tech</span>
-          <span id="nav-badge-tech" class="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">—</span>
-        </button>
-        <button id="nav-execution" onclick="switchStage('execution')" class="stage-nav-btn text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition-colors">
-          <span class="flex items-center gap-1.5"><span id="lock-execution">🔒</span> Execution</span>
-          <span id="nav-badge-execution" class="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">—</span>
-        </button>
-        <div class="mt-auto pt-4 border-t border-gray-100">
-          <button onclick="showView('summary')" class="w-full bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors">View Summary →</button>
-        </div>
-      </aside>
-      <!-- Checklist Area -->
-      <main class="flex-1 min-w-0 overflow-y-auto p-6">
-        <!-- Business Stage -->
-        <div id="stage-business" class="stage-panel">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-900">Business Stage</h2>
-              <div class="flex items-center gap-2 mt-1">
-                <span id="badge-business" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Not Started</span>
-                <span class="text-gray-400 text-xs">Owner: <span class="text-gray-700 font-medium" id="wf-owner">—</span></span>
-              </div>
-            </div>
-          </div>
-          <div class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100" id="checklist-business"></div>
-          <button id="complete-business" onclick="completeStage('business')" disabled class="mt-4 bg-green-500 disabled:bg-gray-200 disabled:text-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">Mark Stage Complete</button>
-        </div>
-        <!-- Product Stage -->
-        <div id="stage-product" class="stage-panel hidden">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-900">Product Stage</h2>
-              <div class="flex items-center gap-2 mt-1">
-                <span id="badge-product" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Not Started</span>
-                <span class="text-gray-400 text-xs">Owner: <span class="text-gray-700 font-medium" id="wf-owner-p">—</span></span>
-              </div>
-            </div>
-          </div>
-          <div class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100" id="checklist-product"></div>
-          <button id="complete-product" onclick="completeStage('product')" disabled class="mt-4 bg-green-500 disabled:bg-gray-200 disabled:text-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">Mark Stage Complete</button>
-        </div>
-        <!-- Tech Stage -->
-        <div id="stage-tech" class="stage-panel hidden">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-900">Tech Stage</h2>
-              <div class="flex items-center gap-2 mt-1">
-                <span id="badge-tech" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Not Started</span>
-                <span class="text-gray-400 text-xs">Owner: <span class="text-gray-700 font-medium" id="wf-owner-t">—</span></span>
-              </div>
-            </div>
-          </div>
-          <div class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100" id="checklist-tech"></div>
-          <button id="complete-tech" onclick="completeStage('tech')" disabled class="mt-4 bg-green-500 disabled:bg-gray-200 disabled:text-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">Mark Stage Complete</button>
-        </div>
-        <!-- Execution Stage -->
-        <div id="stage-execution" class="stage-panel hidden">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-900">Execution</h2>
-              <div class="flex items-center gap-2 mt-1">
-                <span id="badge-execution" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Not Started</span>
-                <span class="text-gray-400 text-xs">Hardcoded ticket data</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 text-xs text-gray-400">
-              <span id="exec-sprint-label" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full font-medium"></span>
-              <span>Est. completion: <span id="exec-est-completion" class="font-medium text-gray-700"></span></span>
-              <button id="exec-refresh-btn" onclick="refreshTickets()" class="ml-2 flex items-center gap-1 text-xs font-medium text-gray-500 border border-gray-200 rounded-lg px-2.5 py-1 hover:bg-gray-50 hover:text-gray-700 transition-colors">↻ Refresh</button>
-            </div>
-          </div>
-          <div class="flex flex-wrap gap-3 mb-5">
-            <div class="bg-white border border-gray-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-              <div><div class="text-lg font-bold text-gray-900" id="exec-pct">0%</div><div class="text-xs text-gray-400">Complete</div></div>
-            </div>
-            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
-              <div><div class="text-lg font-bold text-green-700" id="exec-count-done">0</div><div class="text-xs text-green-600">Done</div></div>
-            </div>
-            <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
-              <div><div class="text-lg font-bold text-blue-700" id="exec-count-inprogress">0</div><div class="text-xs text-blue-600">In Progress</div></div>
-            </div>
-            <div class="bg-purple-50 border border-purple-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-purple-500 shrink-0"></span>
-              <div><div class="text-lg font-bold text-purple-700" id="exec-count-inreview">0</div><div class="text-xs text-purple-600">In Review</div></div>
-            </div>
-            <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
-              <div><div class="text-lg font-bold text-amber-700" id="exec-count-onhold">0</div><div class="text-xs text-amber-600">On Hold</div></div>
-            </div>
-            <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
-              <div><div class="text-lg font-bold text-red-700" id="exec-count-blocked">0</div><div class="text-xs text-red-600">Blocked</div></div>
-            </div>
-            <div class="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-gray-400 shrink-0"></span>
-              <div><div class="text-lg font-bold text-gray-600" id="exec-count-new">0</div><div class="text-xs text-gray-500">New</div></div>
-            </div>
-          </div>
-          <div class="mb-5">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-xs text-gray-500 font-medium">Overall Progress</span>
-              <span class="text-xs text-gray-700 font-semibold" id="exec-pct-bar-label">0%</span>
-            </div>
-            <div class="w-full bg-gray-100 rounded-full h-2.5">
-              <div id="exec-progress-bar" class="bg-green-500 h-2.5 rounded-full transition-all duration-500" style="width:0%"></div>
-            </div>
-          </div>
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">#</th>
-                  <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Title</th>
-                  <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide w-32">Assignee</th>
-                  <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide w-32">Status</th>
-                </tr>
-              </thead>
-              <tbody id="exec-ticket-rows" class="divide-y divide-gray-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </main>
-      <!-- AI Auditor Panel -->
-      <aside id="ai-panel" class="w-80 bg-white border-l border-gray-200 flex flex-col shrink-0">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">✦</div>
-            <div>
-              <p class="font-semibold text-gray-800 text-sm leading-none">AI Auditor</p>
-              <p class="text-xs text-green-500 mt-0.5">Online</p>
-            </div>
-          </div>
-          <button onclick="toggleAIPanel()" class="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors" title="Collapse">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </div>
+      <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+      <div id="ai-prompt-chips" class="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0"></div>
+      <div class="px-4 py-3 border-t border-gray-100 shrink-0">
+        <div class="flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+          <textarea id="ai-input" rows="1" placeholder="Ask the AI Auditor…" class="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 resize-none focus:outline-none leading-5 max-h-24" oninput="autoResizeAI(this)" onkeydown="aiInputKeydown(event)"></textarea>
+          <button onclick="sendAIMessage()" class="shrink-0 w-7 h-7 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-colors">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
-        <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
-        <div id="ai-prompt-chips" class="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0"></div>
-        <div class="px-4 py-3 border-t border-gray-100 shrink-0">
-          <div class="flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-100 transition-all">
-            <textarea id="ai-input" rows="1" placeholder="Ask the AI Auditor…" class="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 resize-none focus:outline-none leading-5 max-h-24" oninput="autoResizeAI(this)" onkeydown="aiInputKeydown(event)"></textarea>
-            <button onclick="sendAIMessage()" class="shrink-0 w-7 h-7 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-colors">
-              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-          </div>
-          <p class="text-xs text-gray-400 mt-1.5 text-center">Insights are AI-generated and contextual to the current stage.</p>
-        </div>
-      </aside>
-      <div id="ai-panel-collapsed" class="hidden w-10 bg-white border-l border-gray-200 flex flex-col items-center py-4 shrink-0">
-        <button onclick="toggleAIPanel()" class="text-gray-400 hover:text-gray-700" title="Expand AI Auditor">
-          <span style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:600;letter-spacing:0.05em;">✦ AI Auditor</span>
-        </button>
+        <p class="text-xs text-gray-400 mt-1.5 text-center">Insights are AI-generated and contextual to the current group.</p>
       </div>
+    </aside>
+    <div id="ai-panel-collapsed" class="hidden w-10 bg-white border-l border-gray-200 flex flex-col items-center py-4 shrink-0">
+      <button onclick="toggleAIPanel()" class="text-gray-400 hover:text-gray-700" title="Expand AI Auditor">
+        <span style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:600;letter-spacing:0.05em;">✦ AI Auditor</span>
+      </button>
     </div>
   </div>
+</div>
 
-  <!-- VIEW 4: SUMMARY -->
-  <div id="view-summary" class="view">
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-        </div>
-        <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
+<!-- ═══════════════════════════════════════════════════════════════
+     VIEW 4 · SUMMARY
+═══════════════════════════════════════════════════════════════ -->
+<div id="view-summary" class="view">
+  <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
       </div>
-    </nav>
-    <main class="max-w-4xl mx-auto px-6 py-8">
-      <div id="summary-banner" class="rounded-xl p-6 mb-8 flex items-center gap-4">
-        <div id="summary-banner-icon" class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0"></div>
-        <div>
-          <h1 id="summary-banner-title" class="text-xl font-bold"></h1>
-          <p id="summary-banner-sub" class="text-sm mt-0.5 opacity-80"></p>
+      <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
+    </div>
+  </nav>
+  <main class="max-w-5xl mx-auto px-6 py-8">
+    <!-- Banner -->
+    <div id="summary-banner" class="rounded-xl p-6 mb-8 flex items-center gap-4">
+      <div id="summary-banner-icon" class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0"></div>
+      <div>
+        <h1 id="summary-banner-title" class="text-xl font-bold"></h1>
+        <p id="summary-banner-sub" class="text-sm mt-0.5 opacity-80"></p>
+      </div>
+    </div>
+    <!-- Gate+group grid — rendered dynamically -->
+    <div id="summary-gates" class="space-y-6 mb-8"></div>
+    <!-- Execution summary card -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+      <div class="flex items-center justify-between mb-3">
+        <span class="font-semibold text-gray-800">🚀 Execution</span>
+        <span id="sum-badge-execution" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">—</span>
+      </div>
+      <div class="grid grid-cols-3 gap-4 text-xs text-gray-600 mb-3">
+        <div>Tickets done: <span class="font-medium text-gray-800" id="sum-pct-execution">—</span></div>
+        <div>Sprint: <span class="font-medium text-gray-800" id="sum-exec-sprint">—</span></div>
+        <div>Est: <span class="font-medium text-gray-800" id="sum-exec-est">—</span></div>
+      </div>
+      <button id="approve-execution" onclick="toggleApprove('execution')" class="w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors">Approve</button>
+    </div>
+    <!-- Missing + Risks -->
+    <div class="grid grid-cols-2 gap-6 mb-8">
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>Missing Required Items</h3>
+        <ul id="summary-missing" class="space-y-1.5 text-sm text-gray-600"></ul>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>Key Risks</h3>
+        <ul id="summary-risks" class="space-y-1.5 text-sm text-gray-600"></ul>
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="showView('workflow')" class="bg-white text-gray-700 border border-gray-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">← Back to Workflow</button>
+      <button onclick="showView('dashboard')" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Return to Dashboard</button>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VIEW 5 · PROGRESS OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div id="view-progress" class="view">
+  <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      </div>
+      <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="showView('workflow')" class="text-xs bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg font-medium hover:bg-gray-50 transition-colors">← Back to Workflow</button>
+      <button onclick="showView('summary')" class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-100 transition-colors">View Summary →</button>
+      <button onclick="showView('dashboard')" class="text-gray-500 hover:text-gray-800 text-sm font-medium">← Dashboard</button>
+    </div>
+  </nav>
+  <main class="max-w-4xl mx-auto px-6 py-8">
+    <div class="mb-6">
+      <h1 class="text-xl font-semibold text-gray-900 mb-1">Progress Overview</h1>
+      <p class="text-gray-500 text-sm" id="progress-feature-title">—</p>
+    </div>
+    <!-- Overall readiness bar -->
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 mb-6 flex items-center gap-5">
+      <div class="shrink-0">
+        <div class="text-2xl font-bold text-gray-900" id="progress-overall-pct">0%</div>
+        <div class="text-xs text-gray-400">Overall</div>
+      </div>
+      <div class="flex-1">
+        <div class="w-full bg-gray-100 rounded-full h-3">
+          <div id="progress-overall-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width:0%"></div>
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-4 mb-8">
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <span class="font-semibold text-gray-800">Business</span>
-            <span id="sum-badge-business" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">—</span>
+      <div id="progress-overall-badge" class="shrink-0 text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500"></div>
+    </div>
+    <!-- Per-gate breakdown -->
+    <div id="progress-gates" class="space-y-4"></div>
+  </main>
+</div>
+
+<script>
+// ── MOCK DATA ─────────────────────────────────────────────────────────────
+const MOCK_REQUESTS = [
+  { id:'r1', title:'SSO Integration',     owner:'Priya S.',  risk:'Dependency',         dashboard_stage:'Tech',     dashboard_progress:52, signoffMode:'manual' },
+  { id:'r2', title:'Bulk Export',         owner:'James K.',  risk:'Missing edge cases', dashboard_stage:'Product',  dashboard_progress:30, signoffMode:'auto'   },
+  { id:'r3', title:'Role-Based Access',   owner:'Aisha M.',  risk:'Blocker',            dashboard_stage:'Business', dashboard_progress:10, signoffMode:'auto'   },
+  { id:'r4', title:'Analytics Dashboard', owner:'Tom R.',    risk:'',                   dashboard_stage:'Ready',    dashboard_progress:100,signoffMode:'manual' },
+];
+
+const MOCK_TICKETS = {
+  r1:{ sprint:'Sprint 14',estCompletion:'12 Jun 2026',tickets:[
+    {op_id:'SSO-001',title:'Implement OAuth 2.0 flow',         assignee:'Dev A',  status:'Done'},
+    {op_id:'SSO-002',title:'SAML metadata endpoint',           assignee:'Dev B',  status:'Done'},
+    {op_id:'SSO-003',title:'Session token validation',         assignee:'Dev A',  status:'In Progress'},
+    {op_id:'SSO-004',title:'IdP configuration UI',            assignee:'Dev C',  status:'In Review'},
+    {op_id:'SSO-005',title:'Logout / session expiry handling', assignee:'Dev B',  status:'In Progress'},
+    {op_id:'SSO-006',title:'Error state pages',                assignee:'QA A',   status:'New'},
+    {op_id:'SSO-007',title:'E2E test suite',                   assignee:'QA A',   status:'New'},
+    {op_id:'SSO-008',title:'Security penetration test',        assignee:'Infosec',status:'Blocked'},
+    {op_id:'SSO-009',title:'Documentation update',             assignee:'Dev C',  status:'On Hold'},
+    {op_id:'SSO-010',title:'Release notes',                    assignee:'PM',     status:'New'},
+  ]},
+  r2:{ sprint:'Sprint 15',estCompletion:'30 Jun 2026',tickets:[
+    {op_id:'EXP-001',title:'CSV export endpoint',              assignee:'Dev D',  status:'Done'},
+    {op_id:'EXP-002',title:'Excel export with formatting',     assignee:'Dev D',  status:'In Progress'},
+    {op_id:'EXP-003',title:'Async job queue for large exports',assignee:'Dev E',  status:'In Progress'},
+    {op_id:'EXP-004',title:'Progress indicator UI',            assignee:'Dev F',  status:'New'},
+    {op_id:'EXP-005',title:'Download link email notification', assignee:'Dev F',  status:'New'},
+    {op_id:'EXP-006',title:'Error handling for timeout',       assignee:'Dev E',  status:'Blocked'},
+  ]},
+  r3:{ sprint:'Sprint 16',estCompletion:'15 Jul 2026',tickets:[
+    {op_id:'RBA-001',title:'Role schema design',               assignee:'Dev G',  status:'In Progress'},
+    {op_id:'RBA-002',title:'Permission matrix definition',     assignee:'PM',     status:'New'},
+    {op_id:'RBA-003',title:'Admin UI for role assignment',     assignee:'Dev H',  status:'New'},
+    {op_id:'RBA-004',title:'Audit log for permission changes', assignee:'Dev G',  status:'New'},
+  ]},
+  r4:{ sprint:'Sprint 13',estCompletion:'01 May 2026',tickets:[
+    {op_id:'ANL-001',title:'Dashboard data model',             assignee:'Dev I',  status:'Done'},
+    {op_id:'ANL-002',title:'Chart components (bar/line/pie)',  assignee:'Dev J',  status:'Done'},
+    {op_id:'ANL-003',title:'Realtime data polling',            assignee:'Dev I',  status:'Done'},
+    {op_id:'ANL-004',title:'Export to PDF',                    assignee:'Dev J',  status:'Done'},
+    {op_id:'ANL-005',title:'QA sign-off',                      assignee:'QA B',   status:'Done'},
+    {op_id:'ANL-006',title:'Staging deployment',               assignee:'Ops',    status:'Done'},
+    {op_id:'ANL-007',title:'Production release',               assignee:'Ops',    status:'Done'},
+  ]},
+};
+
+// Helpers to enumerate all groups across all gates
+function allGateKeys() { return Object.keys(STAGE_GROUPS).filter(b => b !== 'execution'); }
+function groupKeysFor(gateId) { return Object.keys(STAGE_GROUPS[gateId]?.groups || {}); }
+function allItems(gateId, groupId) { return STAGE_GROUPS[gateId]?.groups[groupId]?.items || []; }
+
+// Build a blank checks/notes/groupStatus structure for all gates+groups
+function blankState() {
+  const checks = {}, notes = {}, groupStatus = {}, groupSignedOff = {}, approvals = {};
+  allGateKeys().forEach(b => {
+    checks[b] = {}; notes[b] = {}; groupStatus[b] = {}; groupSignedOff[b] = {};
+    groupKeysFor(b).forEach(g => {
+      checks[b][g] = {}; notes[b][g] = {};
+      groupStatus[b][g] = 'not-started';
+      groupSignedOff[b][g] = false;
+    });
+    approvals[b] = false;
+  });
+  approvals['execution'] = false;
+  return { checks, notes, groupStatus, groupSignedOff, approvals };
+}
+
+// Hardcoded initial state per mock request (checks only — rest defaults)
+const INITIAL_CHECKS = {
+  r1: {
+    business:  { strategy:{'b-s1':true,'b-s2':true,'b-s3':true,'b-s4':false}, compliance:{'b-c1':true,'b-c2':true,'b-c3':false,'b-c4':false,'b-c5':false}, finance:{'b-f1':true,'b-f2':true,'b-f3':false,'b-f4':false}, stakeholders:{'b-st1':true,'b-st2':true,'b-st3':false,'b-st4':false} },
+    product:   { userstories:{'p-u1':true,'p-u2':true,'p-u3':false,'p-u4':false}, design:{'p-d1':true,'p-d2':false,'p-d3':false,'p-d4':false,'p-d5':false}, edgecases:{'p-e1':false,'p-e2':false,'p-e3':false,'p-e4':false} },
+    tech:      { architecture:{'t-a1':true,'t-a2':false,'t-a3':false,'t-a4':false}, security:{'t-sec1':false,'t-sec2':false,'t-sec3':false,'t-sec4':false,'t-sec5':false}, frontend:{'t-fe1':false,'t-fe2':false,'t-fe3':false,'t-fe4':false,'t-fe5':false}, backend:{'t-be1':true,'t-be2':false,'t-be3':false,'t-be4':false,'t-be5':false}, qa:{'t-qa1':false,'t-qa2':false,'t-qa3':false,'t-qa4':false,'t-qa5':false}, techops:{'t-o1':false,'t-o2':false,'t-o3':false,'t-o4':false,'t-o5':false} },
+    marketing: { marketing:{'m1':false,'m2':false,'m3':false,'m4':false,'m5':false,'m6':false} },
+  },
+  r2: {
+    business:  { strategy:{'b-s1':true,'b-s2':true,'b-s3':false,'b-s4':false}, compliance:{'b-c1':false,'b-c2':false,'b-c3':false,'b-c4':false,'b-c5':false}, finance:{'b-f1':true,'b-f2':false,'b-f3':false,'b-f4':false}, stakeholders:{'b-st1':true,'b-st2':false,'b-st3':false,'b-st4':false} },
+    product:   { userstories:{'p-u1':true,'p-u2':false,'p-u3':false,'p-u4':false}, design:{'p-d1':false,'p-d2':false,'p-d3':false,'p-d4':false,'p-d5':false}, edgecases:{'p-e1':false,'p-e2':false,'p-e3':false,'p-e4':false} },
+    tech:      { architecture:{}, security:{}, frontend:{}, backend:{}, qa:{}, techops:{} },
+    marketing: { marketing:{} },
+  },
+  r3: {
+    business:  { strategy:{'b-s1':true,'b-s2':false,'b-s3':false,'b-s4':false}, compliance:{}, finance:{}, stakeholders:{} },
+    product:   { userstories:{}, design:{}, edgecases:{} },
+    tech:      { architecture:{}, security:{}, frontend:{}, backend:{}, qa:{}, techops:{} },
+    marketing: { marketing:{} },
+  },
+  r4: {
+    business:  { strategy:{'b-s1':true,'b-s2':true,'b-s3':true,'b-s4':true}, compliance:{'b-c1':true,'b-c2':true,'b-c3':true,'b-c4':true,'b-c5':true}, finance:{'b-f1':true,'b-f2':true,'b-f3':true,'b-f4':true}, stakeholders:{'b-st1':true,'b-st2':true,'b-st3':true,'b-st4':true} },
+    product:   { userstories:{'p-u1':true,'p-u2':true,'p-u3':true,'p-u4':true}, design:{'p-d1':true,'p-d2':true,'p-d3':true,'p-d4':true,'p-d5':true}, edgecases:{'p-e1':true,'p-e2':true,'p-e3':true,'p-e4':true} },
+    tech:      { architecture:{'t-a1':true,'t-a2':true,'t-a3':true,'t-a4':true}, security:{'t-sec1':true,'t-sec2':true,'t-sec3':true,'t-sec4':true,'t-sec5':true}, frontend:{'t-fe1':true,'t-fe2':true,'t-fe3':true,'t-fe4':true,'t-fe5':true}, backend:{'t-be1':true,'t-be2':true,'t-be3':true,'t-be4':true,'t-be5':true}, qa:{'t-qa1':true,'t-qa2':true,'t-qa3':true,'t-qa4':true,'t-qa5':true}, techops:{'t-o1':true,'t-o2':true,'t-o3':true,'t-o4':true,'t-o5':true} },
+    marketing: { marketing:{'m1':true,'m2':true,'m3':true,'m4':true,'m5':true,'m6':true} },
+  },
+};
+
+// Runtime
+let requests = MOCK_REQUESTS.map(r => ({...r}));
+
+let state = {
+  activeRequest: null,
+  activeGate:  'business',
+  activeGroup:   null,
+  aiPanelOpen:   true,
+  signoffMode:   'auto',   // 'auto' | 'manual'
+  checks:        {},
+  notes:         {},
+  groupStatus:   {},
+  groupSignedOff:{},
+  approvals:     {},
+  ticketCache:   null,
+};
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (id === 'summary')   renderSummary();
+  if (id === 'dashboard') loadDashboard();
+  if (id === 'progress')  renderProgress();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────
+function loadDashboard() {
+  const tbody = document.getElementById('dashboard-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const stageColors = { Business:'bg-orange-100 text-orange-700', Product:'bg-purple-100 text-purple-700', Tech:'bg-blue-100 text-blue-700', Marketing:'bg-pink-100 text-pink-700', Ready:'bg-green-100 text-green-700' };
+  const modeColors  = { auto:'bg-teal-50 text-teal-700 border-teal-200', manual:'bg-violet-50 text-violet-700 border-violet-200' };
+  requests.forEach(req => {
+    const pct  = req.dashboard_progress;
+    const bar  = pct===100?'bg-green-500':pct>=80?'bg-blue-500':pct>=50?'bg-amber-400':'bg-red-500';
+    const pill = stageColors[req.dashboard_stage]||'bg-gray-100 text-gray-600';
+    const mc   = modeColors[req.signoffMode]||'bg-gray-100 text-gray-500 border-gray-200';
+    const tr   = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 transition-colors';
+    tr.innerHTML = `
+      <td class="px-5 py-4 font-medium text-gray-900">${req.title}</td>
+      <td class="px-5 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pill}">${req.dashboard_stage}</span></td>
+      <td class="px-5 py-4">
+        <div class="flex items-center gap-2">
+          <div class="w-24 bg-gray-100 rounded-full h-1.5"><div class="${bar} h-1.5 rounded-full" style="width:${pct}%"></div></div>
+          <span class="text-gray-600 text-xs">${pct}%</span>
+        </div>
+      </td>
+      <td class="px-5 py-4 text-gray-600">${req.owner}</td>
+      <td class="px-5 py-4">${req.risk?`<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">${req.risk}</span>`:'<span class="text-gray-400 text-xs">—</span>'}</td>
+      <td class="px-5 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${mc}">${req.signoffMode==='auto'?'Auto-detect':'Manual sign-off'}</span></td>
+      <td class="px-5 py-4 text-right"><button onclick="loadRequest('${req.id}')" class="text-blue-600 font-medium hover:text-blue-800 text-xs">View →</button></td>`;
+    tbody.appendChild(tr);
+  });
+  const total   = requests.length;
+  const ready   = requests.filter(r=>r.dashboard_stage==='Ready').length;
+  const inprog  = requests.filter(r=>r.dashboard_progress>0&&r.dashboard_stage!=='Ready').length;
+  const blocked = requests.filter(r=>r.risk==='Blocker').length;
+  document.getElementById('dash-total-chip').textContent    = total+' Request'+(total!==1?'s':'');
+  document.getElementById('dash-ready-chip').textContent    = ready+' Ready';
+  document.getElementById('dash-inprogress-chip').textContent = inprog+' In Progress';
+  document.getElementById('dash-blocked-chip').textContent  = blocked+' Blocked';
+}
+
+// ── LOAD REQUEST ──────────────────────────────────────────────────────────
+function loadRequest(id) {
+  state.activeRequest = id;
+  state.activeGate  = 'business';
+  state.activeGroup   = null;
+  state.ticketCache   = null;
+
+  const req = requests.find(r=>r.id===id);
+  state.signoffMode = req ? req.signoffMode : 'auto';
+
+  // Build blank state then overlay saved checks
+  const blank = blankState();
+  state.checks        = blank.checks;
+  state.notes         = blank.notes;
+  state.groupStatus   = blank.groupStatus;
+  state.groupSignedOff= blank.groupSignedOff;
+  state.approvals     = blank.approvals;
+
+  const savedChecks = INITIAL_CHECKS[id] || {};
+  allGateKeys().forEach(b => {
+    groupKeysFor(b).forEach(g => {
+      const saved = (savedChecks[b]||{})[g] || {};
+      state.checks[b][g] = { ...saved };
+    });
+  });
+
+  // Derive initial groupStatus from checks
+  allGateKeys().forEach(b => {
+    groupKeysFor(b).forEach(g => {
+      recomputeGroupStatus(b, g, false);
+    });
+  });
+
+  // Set breadcrumb title + signoff mode badge
+  const title = req ? req.title : '—';
+  document.getElementById('wf-breadcrumb-title').textContent = title;
+  const badge = document.getElementById('wf-signoff-mode-badge');
+  badge.textContent = state.signoffMode==='auto' ? '⚡ Auto-detect' : '✍ Manual sign-off';
+  badge.className = state.signoffMode==='auto'
+    ? 'text-xs px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 font-medium border border-teal-200'
+    : 'text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-medium border border-violet-200';
+
+  buildGateNav();
+  switchGate('business');
+  showView('workflow');
+}
+
+// ── CREATE REQUEST ────────────────────────────────────────────────────────
+function submitCreateRequest() {
+  const title   = document.getElementById('create-title').value.trim();
+  const goal    = document.getElementById('create-goal').value.trim();
+  const metrics = document.getElementById('create-metrics').value.trim();
+  const owner   = document.getElementById('create-owner').value;
+  const quarter = document.getElementById('create-quarter').value;
+  const mode    = document.querySelector('input[name="signoff-mode"]:checked')?.value || 'auto';
+  const err     = document.getElementById('create-error');
+  if (!title||!goal||!metrics||!owner||!quarter) { err.classList.remove('hidden'); return; }
+  err.classList.add('hidden');
+  const newId = 'new-'+Date.now();
+  requests.push({ id:newId, title, owner, risk:'', dashboard_stage:'Business', dashboard_progress:0, signoffMode:mode });
+  ['create-title','create-goal','create-metrics'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('create-owner').value='';
+  document.getElementById('create-quarter').value='';
+  document.querySelector('input[name="signoff-mode"][value="auto"]').checked=true;
+  loadRequest(newId);
+}
+
+// ── RENDER CHECKLIST ──────────────────────────────────────────────────────
+function renderGroupChecklist(gateId, groupId) {
+  const items = allItems(gateId, groupId);
+  const groupDef = STAGE_GROUPS[gateId].groups[groupId];
+  const status = state.groupStatus[gateId][groupId];
+  const signedOff = state.groupSignedOff[gateId][groupId];
+
+  let html = `<div class="mb-2 flex items-center justify-between">
+    <div>
+      <h2 class="text-base font-semibold text-gray-900">${groupDef.label}</h2>
+      <div class="flex items-center gap-2 mt-1">
+        <span id="badge-${gateId}-${groupId}" class="text-xs px-2 py-0.5 rounded-full font-medium"></span>
+        <span class="text-xs text-gray-400">${items.filter(i=>i.required).length} required · ${items.filter(i=>!i.required).length} optional</span>
+      </div>
+    </div>`;
+
+  if (state.signoffMode === 'manual') {
+    html += `<button id="signoff-btn-${gateId}-${groupId}" onclick="signoffGroup('${gateId}','${groupId}')"
+      class="text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${signedOff?'bg-green-50 text-green-700 border-green-300':'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">
+      ${signedOff?'✓ Signed Off':'Sign off group'}</button>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 mt-3">`;
+  items.forEach(item => {
+    const checked = state.checks[gateId][groupId][item.id] || false;
+    const note    = state.notes[gateId]?.[groupId]?.[item.id] || '';
+    html += `<div class="px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors" onclick="onChecklistItemFocus('${gateId}','${groupId}','${item.id}')">
+      <div class="flex items-start gap-3">
+        <input type="checkbox" id="chk-${item.id}" ${checked?'checked':''} onchange="onCheck('${gateId}','${groupId}','${item.id}',this.checked)"
+          class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0 cursor-pointer" />
+        <div class="flex-1 min-w-0">
+          <label for="chk-${item.id}" class="text-sm font-medium text-gray-800 cursor-pointer ${checked?'line-through text-gray-400':''}">${item.label}</label>
+          ${item.required?'<span class="ml-2 text-xs font-medium text-red-500 bg-red-50 px-1.5 py-0.5 rounded">Required</span>':''}
+          <input type="text" value="${note}" placeholder="Add a note..." onchange="onNote('${gateId}','${groupId}','${item.id}',this.value)"
+            class="mt-1.5 w-full text-xs border border-gray-100 rounded px-2 py-1 text-gray-500 placeholder-gray-300 focus:outline-none focus:border-blue-300 bg-gray-50" />
+        </div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+// ── CHECK / NOTE HANDLERS ─────────────────────────────────────────────────
+function onCheck(gateId, groupId, itemId, checked) {
+  const items = allItems(gateId, groupId);
+  const item  = items.find(i=>i.id===itemId);
+  if (checked && item && item.required) {
+    showConfirmModal(gateId, groupId, itemId);
+    return;
+  }
+  state.checks[gateId][groupId][itemId] = checked;
+  const lbl = document.querySelector(`label[for="chk-${itemId}"]`);
+  if (lbl) { lbl.classList.toggle('line-through',checked); lbl.classList.toggle('text-gray-400',checked); }
+  recomputeGroupStatus(gateId, groupId, true);
+  updateAIPanel();
+}
+
+function onNote(gateId, groupId, itemId, val) {
+  if (!state.notes[gateId]) state.notes[gateId] = {};
+  if (!state.notes[gateId][groupId]) state.notes[gateId][groupId] = {};
+  state.notes[gateId][groupId][itemId] = val;
+}
+
+// ── GROUP STATUS ──────────────────────────────────────────────────────────
+function recomputeGroupStatus(gateId, groupId, nudge) {
+  const items   = allItems(gateId, groupId);
+  const checks  = state.checks[gateId][groupId] || {};
+  const allReq  = items.filter(i=>i.required).every(i=>checks[i.id]);
+  const anyChk  = items.some(i=>checks[i.id]);
+  const so      = state.groupSignedOff[gateId][groupId];
+
+  let status;
+  if (state.signoffMode === 'auto') {
+    status = allReq ? 'complete' : anyChk ? 'in-progress' : 'not-started';
+    state.groupSignedOff[gateId][groupId] = allReq;
+  } else {
+    status = so ? 'complete' : anyChk ? 'in-progress' : 'not-started';
+  }
+  state.groupStatus[gateId][groupId] = status;
+
+  // Update badge in the checklist area if visible
+  setBadge(`badge-${gateId}-${groupId}`, status);
+  updateGateBadge(gateId);
+  // Refresh mini sidebar if this gate is active
+  if (state.activeGate === gateId) updateMiniSidebar(gateId);
+
+  // AI nudge when all required items just ticked
+  if (nudge && allReq && status !== 'complete') {
+    const alreadyNudged = aiHistory.some(m=>m._nudgeGroup===`${gateId}-${groupId}`);
+    if (!alreadyNudged) {
+      const optLeft = items.filter(i=>!i.required&&!checks[i.id]).length;
+      const groupLabel = STAGE_GROUPS[gateId].groups[groupId].label;
+      const text = optLeft > 0
+        ? `All required items in ${groupLabel} are complete. There ${optLeft===1?'is':'are'} still ${optLeft} optional item${optLeft>1?'s':''} — want me to review them?`
+        : `All items in ${groupLabel} are complete. ${state.signoffMode==='manual'?'You can now sign off this group.':'This group is now marked complete.'}`;
+      setTimeout(()=>{ aiHistory.push({role:'ai',type:'suggestion',_nudgeGroup:`${gateId}-${groupId}`,text}); renderAIMessages(); },400);
+    }
+  }
+}
+
+function updateGateBadge(gateId) {
+  const groups  = groupKeysFor(gateId);
+  const statuses= groups.map(g=>state.groupStatus[gateId][g]);
+  const allComp = statuses.every(s=>s==='complete');
+  const anyProg = statuses.some(s=>s==='in-progress'||s==='complete');
+  const agg = allComp ? 'complete' : anyProg ? 'in-progress' : 'not-started';
+  setBadge('nav-badge-gate-'+gateId, agg);
+}
+
+function setBadge(id, status) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const map = {
+    'not-started':['bg-gray-100 text-gray-500','Not Started'],
+    'in-progress': ['bg-amber-100 text-amber-700','In Progress'],
+    'complete':    ['bg-green-100 text-green-700','Complete'],
+    'locked':      ['bg-gray-100 text-gray-400','Locked'],
+  };
+  const [cls,label] = map[status]||map['not-started'];
+  el.className = `text-xs px-1.5 py-0.5 rounded-full font-medium ${cls}`;
+  el.textContent = label;
+}
+
+// ── SIGN OFF GROUP (manual mode) ──────────────────────────────────────────
+function signoffGroup(gateId, groupId) {
+  const items  = allItems(gateId, groupId);
+  const checks = state.checks[gateId][groupId]||{};
+  const allReq = items.filter(i=>i.required).every(i=>checks[i.id]);
+  if (!allReq) {
+    alert('All required items must be checked before you can sign off this group.');
+    return;
+  }
+  state.groupSignedOff[gateId][groupId] = true;
+  recomputeGroupStatus(gateId, groupId, false);
+  // Re-render the group panel so button updates
+  if (state.activeGate===gateId && state.activeGroup===groupId) {
+    renderActiveGroupPanel();
+  }
+}
+
+// ── GATE NAV ─────────────────────────────────────────────────────────────
+const GATE_PILL_COLORS = {
+  business:  { active: 'bg-orange-500 text-white border-orange-500', inactive: 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600' },
+  product:   { active: 'bg-purple-500 text-white border-purple-500', inactive: 'bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:text-purple-600' },
+  tech:      { active: 'bg-blue-600 text-white border-blue-600',     inactive: 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600' },
+  marketing: { active: 'bg-pink-500 text-white border-pink-500',     inactive: 'bg-white text-gray-600 border-gray-200 hover:border-pink-300 hover:text-pink-600' },
+  execution: { active: 'bg-green-600 text-white border-green-600',   inactive: 'bg-white text-gray-600 border-gray-200 hover:border-green-300 hover:text-green-600' },
+};
+
+function buildGateNav() {
+  // ── Gate pill bar ──
+  const bar = document.getElementById('gate-bar');
+  bar.innerHTML = '';
+  const gates = [...allGateKeys(), 'execution'];
+  gates.forEach(gId => {
+    const def = STAGE_GROUPS[gId];
+    const colors = GATE_PILL_COLORS[gId] || GATE_PILL_COLORS.tech;
+    const btn = document.createElement('button');
+    btn.id = 'nav-gate-' + gId;
+    btn.className = `gate-pill flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all ${colors.inactive}`;
+    btn.onclick = () => switchGate(gId);
+    btn.innerHTML = `<span>${def.icon}</span><span>${def.label}</span><span id="nav-badge-gate-${gId}" class="text-xs px-1.5 py-0.5 rounded-full font-medium bg-white/30 ml-0.5"></span>`;
+    bar.appendChild(btn);
+  });
+  allGateKeys().forEach(b => updateGateBadge(b));
+  setBadge('nav-badge-gate-execution', 'not-started');
+}
+
+function updateMiniSidebar(gateId) {
+  const list = document.getElementById('mini-group-list');
+  const sidebar = document.getElementById('gate-group-sidebar');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (gateId === 'execution') {
+    sidebar.classList.add('hidden');
+    return;
+  }
+  sidebar.classList.remove('hidden');
+
+  groupKeysFor(gateId).forEach(g => {
+    const gDef   = STAGE_GROUPS[gateId].groups[g];
+    const items  = allItems(gateId, g);
+    const checks = state.checks[gateId][g] || {};
+    const done   = items.filter(i => checks[i.id]).length;
+    const total  = items.length;
+    const pct    = total ? Math.round((done / total) * 100) : 0;
+    const st     = state.groupStatus[gateId][g];
+    const isActive = state.activeGroup === g;
+
+    const dotColor = st === 'complete' ? 'bg-green-500' : st === 'in-progress' ? 'bg-amber-400' : 'bg-gray-300';
+    const rowClass = isActive
+      ? 'flex items-center gap-2 px-2 py-2 rounded-lg bg-blue-50 cursor-pointer'
+      : 'flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors';
+
+    const row = document.createElement('div');
+    row.className = rowClass;
+    row.onclick = () => switchGroup(gateId, g);
+    row.innerHTML = `
+      <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-medium text-gray-700 truncate ${isActive ? 'text-blue-700' : ''}">${gDef.label}</p>
+        <div class="flex items-center gap-1 mt-0.5">
+          <div class="flex-1 bg-gray-100 rounded-full h-1">
+            <div class="h-1 rounded-full ${st === 'complete' ? 'bg-green-500' : 'bg-blue-400'}" style="width:${pct}%"></div>
           </div>
-          <div class="text-3xl font-bold text-gray-900 mb-1" id="sum-pct-business">0%</div>
-          <div class="text-xs text-gray-500 mb-3">completion</div>
-          <div class="text-xs text-gray-600 mb-3">Owner: <span class="font-medium text-gray-800" id="sum-owner-b">—</span></div>
-          <button id="approve-business" onclick="toggleApprove('business')" class="w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors">Approve</button>
+          <span class="text-xs text-gray-400 tabular-nums shrink-0">${pct}%</span>
         </div>
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <span class="font-semibold text-gray-800">Product</span>
-            <span id="sum-badge-product" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">—</span>
-          </div>
-          <div class="text-3xl font-bold text-gray-900 mb-1" id="sum-pct-product">0%</div>
-          <div class="text-xs text-gray-500 mb-3">completion</div>
-          <div class="text-xs text-gray-600 mb-3">Owner: <span class="font-medium text-gray-800" id="sum-owner-p">—</span></div>
-          <button id="approve-product" onclick="toggleApprove('product')" class="w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors">Approve</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+// ── SWITCH GATE ──────────────────────────────────────────────────────────
+function switchGate(gateId) {
+  state.activeGate = gateId;
+
+  // Highlight active gate pill, reset others
+  const allGates = [...allGateKeys(), 'execution'];
+  allGates.forEach(gId => {
+    const btn = document.getElementById('nav-gate-' + gId);
+    if (!btn) return;
+    const colors = GATE_PILL_COLORS[gId] || GATE_PILL_COLORS.tech;
+    btn.className = `gate-pill flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all ${gId === gateId ? colors.active : colors.inactive}`;
+    // Badge color adjusts for active state
+    const badge = document.getElementById('nav-badge-gate-' + gId);
+    if (badge) badge.className = `text-xs px-1.5 py-0.5 rounded-full font-medium ${gId === gateId ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'}`;
+  });
+
+  const execPanel   = document.getElementById('stage-execution');
+  const checkArea   = document.getElementById('checklist-area');
+  const tabsBar     = document.getElementById('group-tabs-bar');
+  const miniSidebar = document.getElementById('gate-group-sidebar');
+  const aiPanel     = document.getElementById('ai-panel');
+  const aiCollapsed = document.getElementById('ai-panel-collapsed');
+
+  if (gateId === 'execution') {
+    execPanel.classList.remove('hidden');
+    checkArea.classList.add('hidden');
+    tabsBar.classList.add('hidden');
+    miniSidebar.classList.add('hidden');
+    aiPanel.classList.add('hidden');
+    aiCollapsed.classList.remove('hidden');
+    renderExecutionStage();
+    updateBreadcrumb(gateId, null);
+    return;
+  }
+
+  execPanel.classList.add('hidden');
+  checkArea.classList.remove('hidden');
+  tabsBar.classList.remove('hidden');
+  miniSidebar.classList.remove('hidden');
+  if (state.aiPanelOpen) { aiPanel.classList.remove('hidden'); aiCollapsed.classList.add('hidden'); }
+
+  buildGroupTabs(gateId);
+  const firstGroup = groupKeysFor(gateId)[0];
+  switchGroup(gateId, firstGroup);
+}
+
+// ── SWITCH GROUP ──────────────────────────────────────────────────────────
+function buildGroupTabs(gateId) {
+  const bar = document.getElementById('group-tabs-bar');
+  bar.innerHTML = '';
+  groupKeysFor(gateId).forEach(g => {
+    const def = STAGE_GROUPS[gateId].groups[g];
+    const btn = document.createElement('button');
+    btn.id = `tab-${gateId}-${g}`;
+    btn.className = 'group-tab px-4 py-2 text-sm font-medium rounded-t-lg border border-b-0 border-transparent text-gray-500 hover:text-gray-700 -mb-px';
+    btn.onclick = () => switchGroup(gateId, g);
+    // Badge inside tab
+    btn.innerHTML = `${def.label} <span id="tab-badge-${gateId}-${g}" class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-400 font-medium"></span>`;
+    bar.appendChild(btn);
+    // Sync tab badge to current status
+    syncTabBadge(gateId, g);
+  });
+}
+
+function syncTabBadge(gateId, groupId) {
+  const el = document.getElementById(`tab-badge-${gateId}-${groupId}`);
+  if (!el) return;
+  const st = state.groupStatus[gateId][groupId];
+  const map = { 'not-started':['bg-gray-100 text-gray-400',''], 'in-progress':['bg-amber-100 text-amber-600','●'], 'complete':['bg-green-100 text-green-600','✓'] };
+  const [cls,sym] = map[st]||map['not-started'];
+  el.className = `ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-medium ${cls}`;
+  el.textContent = sym;
+}
+
+function switchGroup(gateId, groupId) {
+  state.activeGroup = groupId;
+  // Highlight active tab
+  groupKeysFor(gateId).forEach(g => {
+    const tab = document.getElementById(`tab-${gateId}-${g}`);
+    if (tab) tab.classList.toggle('active', g===groupId);
+  });
+  renderActiveGroupPanel();
+  updateBreadcrumb(gateId, groupId);
+  updateAIPanel();
+}
+
+function renderActiveGroupPanel() {
+  const gateId  = state.activeGate;
+  const groupId = state.activeGroup;
+  const area = document.getElementById('checklist-area');
+  if (!area||!gateId||!groupId) return;
+  area.innerHTML = renderGroupChecklist(gateId, groupId);
+  setBadge(`badge-${gateId}-${groupId}`, state.groupStatus[gateId][groupId]);
+  groupKeysFor(gateId).forEach(g => syncTabBadge(gateId, g));
+  updateMiniSidebar(gateId);
+}
+
+// ── BREADCRUMB ────────────────────────────────────────────────────────────
+function updateBreadcrumb(gateId, groupId) {
+  const gateDef = STAGE_GROUPS[gateId];
+  const bcGate  = document.getElementById('bc-gate');
+  const bcGroup   = document.getElementById('bc-group');
+  const bcSep     = document.getElementById('bc-group-sep');
+  if (bcGate) bcGate.textContent = gateDef ? `${gateDef.icon} ${gateDef.label}` : '';
+  if (groupId && gateDef?.groups[groupId]) {
+    bcGroup.textContent = gateDef.groups[groupId].label;
+    bcSep.classList.remove('hidden');
+    bcGroup.classList.remove('hidden');
+  } else {
+    bcGroup.textContent = '';
+    bcSep.classList.add('hidden');
+    bcGroup.classList.add('hidden');
+  }
+}
+
+// ── APPROVE (summary) ─────────────────────────────────────────────────────
+function toggleApprove(key) {
+  state.approvals[key] = !state.approvals[key];
+  const btn = document.getElementById('approve-'+key);
+  if (!btn) return;
+  if (state.approvals[key]) {
+    btn.textContent = '✓ Approved';
+    btn.className = 'w-full text-xs border border-green-300 rounded-lg py-1.5 font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors';
+  } else {
+    btn.textContent = 'Approve';
+    btn.className = 'w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors';
+  }
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────
+function renderSummary() {
+  const container = document.getElementById('summary-gates');
+  container.innerHTML = '';
+  let allGatesComplete = true;
+
+  allGateKeys().forEach(b => {
+    const gateDef  = STAGE_GROUPS[b];
+    const groups     = groupKeysFor(b);
+    const gateComplete = groups.every(g=>state.groupStatus[b][g]==='complete');
+    if (!gateComplete) allGatesComplete = false;
+
+    const section = document.createElement('div');
+    section.className = 'bg-white border border-gray-200 rounded-xl overflow-hidden';
+    let gateHtml = `<div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+      <span class="font-semibold text-gray-800 flex items-center gap-2">${gateDef.icon} ${gateDef.label}</span>
+      <span class="text-xs text-gray-500">${state.signoffMode==='auto'?'Auto-detect':'Manual sign-off'}</span>
+    </div>
+    <div class="grid grid-cols-2 gap-0 divide-x divide-y divide-gray-100">`;
+
+    groups.forEach(g => {
+      const gDef   = gateDef.groups[g];
+      const items  = allItems(b, g);
+      const checks = state.checks[b][g]||{};
+      const done   = items.filter(i=>checks[i.id]).length;
+      const pct    = items.length ? Math.round((done/items.length)*100) : 0;
+      const st     = state.groupStatus[b][g];
+      const signedOff = state.groupSignedOff[b][g];
+      const approveKey = `${b}-${g}`;
+      if (!state.approvals[approveKey]) state.approvals[approveKey]=false;
+      const isApproved = state.approvals[approveKey];
+
+      gateHtml += `<div class="p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700">${gDef.label}</span>
+          <span id="sum-badge-${b}-${g}" class="text-xs px-1.5 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500"></span>
         </div>
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <span class="font-semibold text-gray-800">Tech</span>
-            <span id="sum-badge-tech" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">—</span>
-          </div>
-          <div class="text-3xl font-bold text-gray-900 mb-1" id="sum-pct-tech">0%</div>
-          <div class="text-xs text-gray-500 mb-3">completion</div>
-          <div class="text-xs text-gray-600 mb-3">Owner: <span class="font-medium text-gray-800" id="sum-owner-t">—</span></div>
-          <button id="approve-tech" onclick="toggleApprove('tech')" class="w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors">Approve</button>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <span class="font-semibold text-gray-800">Execution</span>
-            <span id="sum-badge-execution" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">—</span>
-          </div>
-          <div class="text-3xl font-bold text-gray-900 mb-1" id="sum-pct-execution">—</div>
-          <div class="text-xs text-gray-500 mb-3">tickets done</div>
-          <div class="text-xs text-gray-600 mb-2">Sprint: <span class="font-medium text-gray-800" id="sum-exec-sprint">—</span></div>
-          <div class="text-xs text-gray-600 mb-3">Est: <span class="font-medium text-gray-800" id="sum-exec-est">—</span></div>
-          <button id="approve-execution" onclick="toggleApprove('execution')" class="w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors">Approve</button>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-6 mb-8">
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>Missing Required Items</h3>
-          <ul id="summary-missing" class="space-y-1.5 text-sm text-gray-600"></ul>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>Key Risks</h3>
-          <ul id="summary-risks" class="space-y-1.5 text-sm text-gray-600"></ul>
-        </div>
-      </div>
-      <div class="flex gap-3">
-        <button onclick="showView('workflow')" class="bg-white text-gray-700 border border-gray-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">← Back to Workflow</button>
-        <button onclick="showView('dashboard')" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Return to Dashboard</button>
-      </div>
-    </main>
-  </div>
+        <div class="text-2xl font-bold text-gray-900 mb-0.5">${pct}%</div>
+        <div class="text-xs text-gray-400 mb-2">${done}/${items.length} items · ${items.filter(i=>i.required&&!checks[i.id]).length} required missing</div>
+        ${state.signoffMode==='manual'?`<div class="text-xs mb-2 ${signedOff?'text-green-600':'text-gray-400'}">${signedOff?'✓ Signed off':'Awaiting sign-off'}</div>`:''}
+        <button id="approve-${approveKey}" onclick="toggleApprove('${approveKey}')"
+          class="w-full text-xs rounded-lg py-1.5 font-medium border transition-colors ${isApproved?'bg-green-50 text-green-700 border-green-300 hover:bg-green-100':'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}">
+          ${isApproved?'✓ Approved':'Approve'}</button>
+      </div>`;
+      setBadge(`sum-badge-${b}-${g}`, st);
+    });
+    gateHtml += `</div>`;
+    section.innerHTML = gateHtml;
+    container.appendChild(section);
+  });
 
-  <script>
-    // ── Hardcoded Stage Definitions ───────────────────────────────
-    const STAGES = {
-      business: {
-        label: 'Business',
-        items: [
-          { id: 'b1', label: 'Business objectives documented',         required: true  },
-          { id: 'b2', label: 'Stakeholders identified and notified',   required: true  },
-          { id: 'b3', label: 'Budget approved',                        required: true  },
-          { id: 'b4', label: 'Compliance requirements reviewed',        required: false },
-          { id: 'b5', label: 'Executive sponsor confirmed',             required: false },
-        ]
-      },
-      product: {
-        label: 'Product',
-        items: [
-          { id: 'p1', label: 'User stories written and reviewed',      required: true  },
-          { id: 'p2', label: 'Acceptance criteria defined',            required: true  },
-          { id: 'p3', label: 'UI/UX designs approved',                 required: true  },
-          { id: 'p4', label: 'Edge cases documented',                  required: false },
-          { id: 'p5', label: 'Rollback / feature flag strategy',       required: false },
-          { id: 'p6', label: 'Accessibility reviewed',                 required: false },
-        ]
-      },
-      tech: {
-        label: 'Tech',
-        items: [
-          { id: 't1', label: 'Architecture reviewed and approved',     required: true  },
-          { id: 't2', label: 'API contracts defined',                  required: true  },
-          { id: 't3', label: 'Security review completed',              required: true  },
-          { id: 't4', label: 'Performance impact assessed',            required: false },
-          { id: 't5', label: 'Data migration plan documented',         required: false },
-          { id: 't6', label: 'On-call runbook updated',                required: false },
-          { id: 't7', label: 'Third-party rate limits documented',     required: false },
-        ]
-      },
-      execution: { label: 'Execution', items: [] }
-    };
+  // Execution card
+  const execCache = state.ticketCache;
+  const tickets   = execCache ? execCache.tickets : [];
+  const doneCount = tickets.filter(t=>t.status==='Done').length;
+  document.getElementById('sum-pct-execution').textContent  = tickets.length ? `${doneCount}/${tickets.length}` : '—';
+  document.getElementById('sum-exec-sprint').textContent    = execCache ? execCache.sprint : '—';
+  document.getElementById('sum-exec-est').textContent       = execCache ? execCache.estCompletion : '—';
+  const execStatus = state.ticketCache ? (doneCount===tickets.length&&tickets.length>0?'complete':'in-progress') : 'not-started';
+  setBadge('sum-badge-execution', execStatus);
+  if (execStatus!=='complete') allGatesComplete=false;
 
-    // ── Hardcoded Requests ────────────────────────────────────────
-    const MOCK_REQUESTS = [
-      { id: 'r1', title: 'SSO Integration',     owner: 'Priya S.',  risk: 'Dependency',         dashboard_stage: 'Tech',     dashboard_progress: 85  },
-      { id: 'r2', title: 'Bulk Export',         owner: 'James K.',  risk: 'Missing edge cases', dashboard_stage: 'Product',  dashboard_progress: 50  },
-      { id: 'r3', title: 'Role-Based Access',   owner: 'Aisha M.',  risk: 'Blocker',            dashboard_stage: 'Business', dashboard_progress: 20  },
-      { id: 'r4', title: 'Analytics Dashboard', owner: 'Tom R.',    risk: '',                   dashboard_stage: 'Ready',    dashboard_progress: 100 },
-    ];
+  // Restore execution approve btn
+  const execApproveBtn = document.getElementById('approve-execution');
+  if (execApproveBtn && state.approvals['execution']) {
+    execApproveBtn.textContent='✓ Approved';
+    execApproveBtn.className='w-full text-xs border border-green-300 rounded-lg py-1.5 font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors';
+  }
 
-    // ── Hardcoded initial checklist state per request ─────────────
-    const INITIAL_STATE = {
-      r1: {
-        checks: { business: { b1:true,b2:true,b3:true,b4:true,b5:true }, product: { p1:true,p2:true,p3:true,p4:true,p5:false,p6:false }, tech: { t1:true,t2:true,t3:false,t4:false,t5:false,t6:false,t7:false } },
-        notes:  { business: {}, product: {}, tech: { t3: 'Security review in progress with infosec team' } },
-        stageStatus:  { business: 'complete', product: 'complete', tech: 'in-progress', execution: 'locked' },
-        stageComplete: { business: true, product: true, tech: false },
-        approvals:    { business: true, product: false, tech: false, execution: false },
-      },
-      r2: {
-        checks: { business: { b1:true,b2:true,b3:true,b4:false,b5:false }, product: { p1:true,p2:false,p3:false,p4:false,p5:false,p6:false }, tech: { t1:false,t2:false,t3:false,t4:false,t5:false,t6:false,t7:false } },
-        notes:  { business: {}, product: { p2: 'Acceptance criteria draft shared with QA' }, tech: {} },
-        stageStatus:  { business: 'complete', product: 'in-progress', tech: 'locked', execution: 'locked' },
-        stageComplete: { business: true, product: false, tech: false },
-        approvals:    { business: false, product: false, tech: false, execution: false },
-      },
-      r3: {
-        checks: { business: { b1:true,b2:false,b3:false,b4:false,b5:false }, product: { p1:false,p2:false,p3:false,p4:false,p5:false,p6:false }, tech: { t1:false,t2:false,t3:false,t4:false,t5:false,t6:false,t7:false } },
-        notes:  { business: { b1: 'Initial objectives drafted' }, product: {}, tech: {} },
-        stageStatus:  { business: 'in-progress', product: 'locked', tech: 'locked', execution: 'locked' },
-        stageComplete: { business: false, product: false, tech: false },
-        approvals:    { business: false, product: false, tech: false, execution: false },
-      },
-      r4: {
-        checks: { business: { b1:true,b2:true,b3:true,b4:true,b5:true }, product: { p1:true,p2:true,p3:true,p4:true,p5:true,p6:true }, tech: { t1:true,t2:true,t3:true,t4:true,t5:true,t6:true,t7:true } },
-        notes:  { business: {}, product: {}, tech: {} },
-        stageStatus:  { business: 'complete', product: 'complete', tech: 'complete', execution: 'complete' },
-        stageComplete: { business: true, product: true, tech: true },
-        approvals:    { business: true, product: true, tech: true, execution: true },
-      },
-    };
+  // Banner
+  const banner = document.getElementById('summary-banner');
+  const icon   = document.getElementById('summary-banner-icon');
+  const title  = document.getElementById('summary-banner-title');
+  const sub    = document.getElementById('summary-banner-sub');
+  if (allGatesComplete) {
+    banner.className='rounded-xl p-6 mb-8 flex items-center gap-4 bg-green-50 border border-green-200';
+    icon.className='w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 bg-green-100';
+    icon.textContent='✓'; title.className='text-xl font-bold text-green-800'; title.textContent='Ready for Development';
+    sub.className='text-sm mt-0.5 opacity-80 text-green-700'; sub.textContent='All gates and groups are complete.';
+  } else {
+    banner.className='rounded-xl p-6 mb-8 flex items-center gap-4 bg-red-50 border border-red-200';
+    icon.className='w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 bg-red-100';
+    icon.textContent='✗'; title.className='text-xl font-bold text-red-800'; title.textContent='Not Ready';
+    sub.className='text-sm mt-0.5 opacity-80 text-red-700'; sub.textContent='One or more groups have outstanding required items.';
+  }
 
-    // ── Hardcoded Tickets per request ─────────────────────────────
-    const MOCK_TICKETS = {
-      r1: {
-        sprint: 'Sprint 14', estCompletion: '12 Jun 2026',
-        tickets: [
-          { op_id: 'SSO-001', title: 'Implement OAuth 2.0 flow',            assignee: 'Dev A',   status: 'Done'        },
-          { op_id: 'SSO-002', title: 'SAML metadata endpoint',              assignee: 'Dev B',   status: 'Done'        },
-          { op_id: 'SSO-003', title: 'Session token validation',            assignee: 'Dev A',   status: 'In Progress' },
-          { op_id: 'SSO-004', title: 'IdP configuration UI',               assignee: 'Dev C',   status: 'In Review'   },
-          { op_id: 'SSO-005', title: 'Logout / session expiry handling',    assignee: 'Dev B',   status: 'In Progress' },
-          { op_id: 'SSO-006', title: 'Error state pages',                   assignee: 'QA A',    status: 'New'         },
-          { op_id: 'SSO-007', title: 'E2E test suite',                      assignee: 'QA A',    status: 'New'         },
-          { op_id: 'SSO-008', title: 'Security penetration test',           assignee: 'Infosec', status: 'Blocked'     },
-          { op_id: 'SSO-009', title: 'Documentation update',                assignee: 'Dev C',   status: 'On Hold'     },
-          { op_id: 'SSO-010', title: 'Release notes',                       assignee: 'PM',      status: 'New'         },
-        ]
-      },
-      r2: {
-        sprint: 'Sprint 15', estCompletion: '30 Jun 2026',
-        tickets: [
-          { op_id: 'EXP-001', title: 'CSV export endpoint',                 assignee: 'Dev D',   status: 'Done'        },
-          { op_id: 'EXP-002', title: 'Excel export with formatting',        assignee: 'Dev D',   status: 'In Progress' },
-          { op_id: 'EXP-003', title: 'Async job queue for large exports',   assignee: 'Dev E',   status: 'In Progress' },
-          { op_id: 'EXP-004', title: 'Progress indicator UI',               assignee: 'Dev F',   status: 'New'         },
-          { op_id: 'EXP-005', title: 'Download link email notification',    assignee: 'Dev F',   status: 'New'         },
-          { op_id: 'EXP-006', title: 'Error handling for timeout',          assignee: 'Dev E',   status: 'Blocked'     },
-        ]
-      },
-      r3: {
-        sprint: 'Sprint 16', estCompletion: '15 Jul 2026',
-        tickets: [
-          { op_id: 'RBA-001', title: 'Role schema design',                  assignee: 'Dev G',   status: 'In Progress' },
-          { op_id: 'RBA-002', title: 'Permission matrix definition',        assignee: 'PM',      status: 'New'         },
-          { op_id: 'RBA-003', title: 'Admin UI for role assignment',        assignee: 'Dev H',   status: 'New'         },
-          { op_id: 'RBA-004', title: 'Audit log for permission changes',    assignee: 'Dev G',   status: 'New'         },
-        ]
-      },
-      r4: {
-        sprint: 'Sprint 13', estCompletion: '01 May 2026',
-        tickets: [
-          { op_id: 'ANL-001', title: 'Dashboard data model',               assignee: 'Dev I',   status: 'Done'        },
-          { op_id: 'ANL-002', title: 'Chart components (bar/line/pie)',     assignee: 'Dev J',   status: 'Done'        },
-          { op_id: 'ANL-003', title: 'Realtime data polling',              assignee: 'Dev I',   status: 'Done'        },
-          { op_id: 'ANL-004', title: 'Export to PDF',                      assignee: 'Dev J',   status: 'Done'        },
-          { op_id: 'ANL-005', title: 'QA sign-off',                        assignee: 'QA B',    status: 'Done'        },
-          { op_id: 'ANL-006', title: 'Staging deployment',                 assignee: 'Ops',     status: 'Done'        },
-          { op_id: 'ANL-007', title: 'Production release',                 assignee: 'Ops',     status: 'Done'        },
-        ]
-      },
-    };
-
-    // ── Runtime requests list (can grow with newly created ones) ──
-    let requests = MOCK_REQUESTS.map(r => ({ ...r }));
-
-    // ── State ─────────────────────────────────────────────────────
-    let state = {
-      activeRequest: null,
-      activeStage: 'business',
-      aiPanelOpen: true,
-      checks:        { business: {}, product: {}, tech: {} },
-      notes:         { business: {}, product: {}, tech: {} },
-      stageStatus:   { business: 'not-started', product: 'locked', tech: 'locked', execution: 'locked' },
-      stageComplete: { business: false, product: false, tech: false },
-      approvals:     { business: false, product: false, tech: false, execution: false },
-      ticketCache:   null,
-    };
-
-    // ── Navigation ────────────────────────────────────────────────
-    function showView(id) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById('view-' + id).classList.add('active');
-      if (id === 'summary')   renderSummary();
-      if (id === 'dashboard') loadDashboard();
-    }
-
-    // ── Dashboard ─────────────────────────────────────────────────
-    function loadDashboard() {
-      renderDashboardRows(requests);
-      // Update stat chips
-      const total    = requests.length;
-      const ready    = requests.filter(r => r.dashboard_stage === 'Ready').length;
-      const inprog   = requests.filter(r => !['Ready','Business','Blocked'].includes(r.dashboard_stage) || r.dashboard_progress > 0 && r.dashboard_stage !== 'Ready').length;
-      const blocked  = requests.filter(r => r.risk === 'Blocker').length;
-      document.getElementById('dash-total-chip').textContent    = total + ' Request' + (total !== 1 ? 's' : '');
-      document.getElementById('dash-ready-chip').textContent    = ready + ' Ready';
-      document.getElementById('dash-inprogress-chip').textContent = (requests.filter(r => r.dashboard_progress > 0 && r.dashboard_stage !== 'Ready').length) + ' In Progress';
-      document.getElementById('dash-blocked-chip').textContent  = blocked + ' Blocked';
-    }
-
-    function renderDashboardRows(reqs) {
-      const tbody = document.getElementById('dashboard-tbody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      const stageColors = {
-        'Business': 'bg-orange-100 text-orange-700',
-        'Product':  'bg-purple-100 text-purple-700',
-        'Tech':     'bg-blue-100 text-blue-700',
-        'Ready':    'bg-green-100 text-green-700',
-      };
-      reqs.forEach(req => {
-        const pct  = req.dashboard_progress;
-        const bar  = pct === 100 ? 'bg-green-500' : pct >= 80 ? 'bg-blue-500' : pct >= 50 ? 'bg-amber-400' : 'bg-red-500';
-        const pill = stageColors[req.dashboard_stage] || 'bg-gray-100 text-gray-600';
-        const tr   = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50 transition-colors';
-        tr.innerHTML = `
-          <td class="px-5 py-4 font-medium text-gray-900">${req.title}</td>
-          <td class="px-5 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pill}">${req.dashboard_stage}</span></td>
-          <td class="px-5 py-4">
-            <div class="flex items-center gap-2">
-              <div class="w-24 bg-gray-100 rounded-full h-1.5"><div class="${bar} h-1.5 rounded-full" style="width:${pct}%"></div></div>
-              <span class="text-gray-600 text-xs">${pct}%</span>
-            </div>
-          </td>
-          <td class="px-5 py-4 text-gray-600">${req.owner}</td>
-          <td class="px-5 py-4">${req.risk ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">${req.risk}</span>` : '<span class="text-gray-400 text-xs">—</span>'}</td>
-          <td class="px-5 py-4 text-right"><button onclick="loadRequest('${req.id}')" class="text-blue-600 font-medium hover:text-blue-800 text-xs">View →</button></td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // ── Load Request ──────────────────────────────────────────────
-    function loadRequest(id) {
-      state.activeRequest = id;
-      state.activeStage   = 'business';
-      state.ticketCache   = null;
-
-      const init = INITIAL_STATE[id] || {
-        checks:        { business: {}, product: {}, tech: {} },
-        notes:         { business: {}, product: {}, tech: {} },
-        stageStatus:   { business: 'not-started', product: 'locked', tech: 'locked', execution: 'locked' },
-        stageComplete: { business: false, product: false, tech: false },
-        approvals:     { business: false, product: false, tech: false, execution: false },
-      };
-
-      state.checks        = JSON.parse(JSON.stringify(init.checks));
-      state.notes         = JSON.parse(JSON.stringify(init.notes));
-      state.stageStatus   = { ...init.stageStatus };
-      state.stageComplete = { ...init.stageComplete };
-      state.approvals     = { ...init.approvals };
-
-      const req = requests.find(r => r.id === id);
-      const owner = req ? req.owner : '—';
-      const title = req ? req.title : '—';
-
-      ['wf-owner','wf-owner-p','wf-owner-t'].forEach(elId => {
-        const e = document.getElementById(elId);
-        if (e) e.textContent = owner;
-      });
-      document.getElementById('wf-breadcrumb-title').textContent = title;
-
-      // Update lock icons
-      ['product','tech','execution'].forEach(s => {
-        const lockEl = document.getElementById('lock-' + s);
-        if (lockEl) lockEl.textContent = state.stageStatus[s] === 'locked' ? '🔒' : '';
-      });
-
-      renderChecklist('business');
-      renderChecklist('product');
-      renderChecklist('tech');
-
-      ['business','product','tech','execution'].forEach(s => {
-        setBadge('nav-badge-' + s, state.stageStatus[s]);
-        setBadge('badge-' + s, state.stageStatus[s]);
-        const btn = document.getElementById('complete-' + s);
-        if (btn) {
-          const items = STAGES[s].items;
-          const allReq = items.filter(i => i.required).every(i => state.checks[s][i.id]);
-          btn.disabled = !allReq || state.stageComplete[s];
-        }
-      });
-
-      // Restore approve buttons
-      ['business','product','tech','execution'].forEach(s => {
-        const btn = document.getElementById('approve-' + s);
-        if (btn && state.approvals[s]) {
-          btn.textContent = '✓ Approved';
-          btn.className = 'w-full text-xs border border-green-300 rounded-lg py-1.5 font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors';
-        }
-      });
-
-      // Find the most advanced unlocked stage to show
-      const order = ['business','product','tech','execution'];
-      let startStage = 'business';
-      for (const s of order) {
-        if (state.stageStatus[s] !== 'locked') startStage = s;
-        else break;
-      }
-
-      switchStage(startStage);
-      showView('workflow');
-    }
-
-    // ── Create Request ────────────────────────────────────────────
-    function submitCreateRequest() {
-      const title   = document.getElementById('create-title').value.trim();
-      const goal    = document.getElementById('create-goal').value.trim();
-      const metrics = document.getElementById('create-metrics').value.trim();
-      const owner   = document.getElementById('create-owner').value;
-      const quarter = document.getElementById('create-quarter').value;
-      const err     = document.getElementById('create-error');
-
-      if (!title || !goal || !metrics || !owner || !quarter) {
-        err.classList.remove('hidden'); return;
-      }
-      err.classList.add('hidden');
-
-      const newId = 'new-' + Date.now();
-      const newReq = { id: newId, title, owner, risk: '', dashboard_stage: 'Business', dashboard_progress: 0 };
-      requests.push(newReq);
-
-      // Clear form
-      ['create-title','create-goal','create-metrics'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('create-owner').value = '';
-      document.getElementById('create-quarter').value = '';
-
-      loadRequest(newId);
-    }
-
-    // ── Render Checklist ──────────────────────────────────────────
-    function renderChecklist(stageId) {
-      const container = document.getElementById('checklist-' + stageId);
-      const items = STAGES[stageId].items;
-      container.innerHTML = '';
-      items.forEach(item => {
-        const checked = state.checks[stageId][item.id] || false;
-        const note    = state.notes[stageId][item.id] || '';
-        const div = document.createElement('div');
-        div.className = 'px-4 py-3';
-        div.innerHTML = `
-          <div class="flex items-start gap-3">
-            <input type="checkbox" id="chk-${item.id}" ${checked ? 'checked' : ''} onchange="onCheck('${stageId}','${item.id}',this.checked)"
-              class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0 cursor-pointer" />
-            <div class="flex-1 min-w-0">
-              <label for="chk-${item.id}" class="text-sm font-medium text-gray-800 cursor-pointer ${checked ? 'line-through text-gray-400' : ''}">${item.label}</label>
-              ${item.required ? '<span class="ml-2 text-xs font-medium text-red-500 bg-red-50 px-1.5 py-0.5 rounded">Required</span>' : ''}
-              <input type="text" value="${note}" placeholder="Add a note..." onchange="onNote('${stageId}','${item.id}',this.value)"
-                class="mt-1.5 w-full text-xs border border-gray-100 rounded px-2 py-1 text-gray-500 placeholder-gray-300 focus:outline-none focus:border-blue-300 bg-gray-50" />
-            </div>
-          </div>`;
-        container.appendChild(div);
-      });
-    }
-
-    // ── Checkbox / Note Handlers ──────────────────────────────────
-    function onCheck(stageId, itemId, checked) {
-      state.checks[stageId][itemId] = checked;
-      const lbl = document.querySelector(`label[for="chk-${itemId}"]`);
-      if (lbl) { lbl.classList.toggle('line-through', checked); lbl.classList.toggle('text-gray-400', checked); }
-      updateStageStatus(stageId);
-      updateAIPanel();
-    }
-
-    function onNote(stageId, itemId, val) {
-      state.notes[stageId][itemId] = val;
-    }
-
-    // ── Stage Status ──────────────────────────────────────────────
-    function updateStageStatus(stageId) {
-      const items    = STAGES[stageId].items;
-      const required = items.filter(i => i.required);
-      const allReqChecked = required.every(i => state.checks[stageId][i.id]);
-      const anyChecked    = items.some(i => state.checks[stageId][i.id]);
-
-      const btn = document.getElementById('complete-' + stageId);
-      if (btn) btn.disabled = !allReqChecked || state.stageComplete[stageId];
-
-      let status = state.stageStatus[stageId];
-      if (status === 'locked') return;
-      if (state.stageComplete[stageId]) { status = 'complete'; }
-      else if (anyChecked)              { status = 'in-progress'; }
-      else                              { status = 'not-started'; }
-      state.stageStatus[stageId] = status;
-
-      setBadge('badge-' + stageId, status);
-      setBadge('nav-badge-' + stageId, status);
-      updateBreadcrumb();
-    }
-
-    function setBadge(id, status) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const map = {
-        'not-started': ['bg-gray-100 text-gray-500',   'Not Started'],
-        'in-progress':  ['bg-amber-100 text-amber-700', 'In Progress'],
-        'complete':     ['bg-green-100 text-green-700', 'Complete'],
-        'locked':       ['bg-gray-100 text-gray-400',   '🔒 Locked'],
-      };
-      const [cls, label] = map[status] || map['not-started'];
-      el.className = `text-xs px-1.5 py-0.5 rounded-full font-medium ${cls}`;
-      el.textContent = label;
-    }
-
-    // ── Complete Stage ────────────────────────────────────────────
-    function completeStage(stageId) {
-      state.stageComplete[stageId] = true;
-      state.stageStatus[stageId]   = 'complete';
-      setBadge('badge-' + stageId, 'complete');
-      setBadge('nav-badge-' + stageId, 'complete');
-      const btn = document.getElementById('complete-' + stageId);
-      if (btn) btn.disabled = true;
-
-      const order = ['business','product','tech','execution'];
-      const idx   = order.indexOf(stageId);
-      if (idx < order.length - 1) {
-        const next = order[idx + 1];
-        if (state.stageStatus[next] === 'locked') {
-          state.stageStatus[next] = 'not-started';
-          setBadge('nav-badge-' + next, 'not-started');
-          const lockEl = document.getElementById('lock-' + next);
-          if (lockEl) lockEl.textContent = '';
-        }
-        switchStage(next);
-      }
-      updateBreadcrumb();
-    }
-
-    // ── Switch Stage ──────────────────────────────────────────────
-    function switchStage(stageId) {
-      if (state.stageStatus[stageId] === 'locked') return;
-      state.activeStage = stageId;
-      document.querySelectorAll('.stage-panel').forEach(p => p.classList.add('hidden'));
-      document.getElementById('stage-' + stageId).classList.remove('hidden');
-      document.querySelectorAll('.stage-nav-btn').forEach(b => b.classList.remove('bg-blue-50','text-blue-700'));
-      document.getElementById('nav-' + stageId).classList.add('bg-blue-50','text-blue-700');
-
-      if (stageId === 'execution') {
-        renderExecutionStage();
-        document.getElementById('ai-panel').classList.add('hidden');
-        document.getElementById('ai-panel-collapsed').classList.remove('hidden');
-      } else {
-        if (state.aiPanelOpen) {
-          document.getElementById('ai-panel').classList.remove('hidden');
-          document.getElementById('ai-panel-collapsed').classList.add('hidden');
-        }
-        updateAIPanel();
-      }
-      updateBreadcrumb();
-    }
-
-    // ── Breadcrumb ────────────────────────────────────────────────
-    function updateBreadcrumb() {
-      const order = ['business','product','tech','execution'];
-      order.forEach(s => {
-        const el = document.getElementById('bc-' + s);
-        if (!el) return;
-        const st = state.stageStatus[s];
-        el.className = 'cursor-pointer ';
-        if (s === state.activeStage)  { el.className += 'font-semibold text-blue-700'; }
-        else if (st === 'complete')   { el.className += 'text-green-600'; }
-        else if (st === 'locked')     { el.className += 'text-gray-300 cursor-default'; }
-        else                          { el.className += 'hover:text-blue-600 text-gray-500'; }
-        el.textContent = STAGES[s].label + (st === 'complete' ? ' ✓' : st === 'locked' ? ' 🔒' : '');
-      });
-    }
-
-    // ── Approve Toggle ────────────────────────────────────────────
-    function toggleApprove(stageId) {
-      state.approvals[stageId] = !state.approvals[stageId];
-      const btn = document.getElementById('approve-' + stageId);
-      if (!btn) return;
-      if (state.approvals[stageId]) {
-        btn.textContent = '✓ Approved';
-        btn.className = 'w-full text-xs border border-green-300 rounded-lg py-1.5 font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors';
-      } else {
-        btn.textContent = 'Approve';
-        btn.className = 'w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors';
-      }
-    }
-
-    // ── Execution Stage ───────────────────────────────────────────
-    const TICKET_STATUS_CFG = {
-      'Done':        { pill: 'bg-green-100 text-green-700',   dot: 'bg-green-500' },
-      'In Progress': { pill: 'bg-blue-100 text-blue-700',     dot: 'bg-blue-500' },
-      'In Review':   { pill: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
-      'New':         { pill: 'bg-gray-100 text-gray-600',     dot: 'bg-gray-400' },
-      'On Hold':     { pill: 'bg-amber-100 text-amber-700',   dot: 'bg-amber-400' },
-      'Blocked':     { pill: 'bg-red-100 text-red-700',       dot: 'bg-red-500' },
-    };
-
-    function renderExecutionStage() {
-      if (!state.activeRequest) return;
-      if (!state.ticketCache) {
-        const data = MOCK_TICKETS[state.activeRequest];
-        state.ticketCache = data
-          ? JSON.parse(JSON.stringify(data))
-          : { sprint: 'No Sprint', estCompletion: '—', tickets: [] };
-      }
-      const { sprint, estCompletion, tickets } = state.ticketCache;
-
-      document.getElementById('exec-sprint-label').textContent   = sprint;
-      document.getElementById('exec-est-completion').textContent = estCompletion;
-
-      const counts = { Done: 0, 'In Progress': 0, 'In Review': 0, New: 0, 'On Hold': 0, Blocked: 0 };
-      tickets.forEach(t => { if (counts[t.status] !== undefined) counts[t.status]++; });
-
-      const total = tickets.length;
-      const pct   = total ? Math.round((counts.Done / total) * 100) : 0;
-
-      document.getElementById('exec-pct').textContent              = pct + '%';
-      document.getElementById('exec-pct-bar-label').textContent    = pct + '%';
-      document.getElementById('exec-progress-bar').style.width     = pct + '%';
-      document.getElementById('exec-count-done').textContent       = counts['Done'];
-      document.getElementById('exec-count-inprogress').textContent = counts['In Progress'];
-      document.getElementById('exec-count-inreview').textContent   = counts['In Review'];
-      document.getElementById('exec-count-onhold').textContent     = counts['On Hold'];
-      document.getElementById('exec-count-blocked').textContent    = counts['Blocked'];
-      document.getElementById('exec-count-new').textContent        = counts['New'];
-
-      let execStatus = 'not-started';
-      if (pct === 100) execStatus = 'complete';
-      else if (pct > 0 || counts['In Progress'] > 0 || counts['In Review'] > 0) execStatus = 'in-progress';
-      state.stageStatus.execution = execStatus;
-      setBadge('badge-execution', execStatus);
-      setBadge('nav-badge-execution', execStatus);
-
-      const tbody = document.getElementById('exec-ticket-rows');
-      tbody.innerHTML = '';
-      tickets.forEach(t => {
-        const cfg = TICKET_STATUS_CFG[t.status] || TICKET_STATUS_CFG['New'];
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50 transition-colors';
-        tr.innerHTML = `
-          <td class="px-4 py-3 font-mono text-xs text-gray-400 font-medium">${t.op_id}</td>
-          <td class="px-4 py-3 text-sm text-gray-800">${t.title}</td>
-          <td class="px-4 py-3 text-xs text-gray-500">${t.assignee}</td>
-          <td class="px-4 py-3">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.pill}">
-              <span class="w-1.5 h-1.5 rounded-full ${cfg.dot}"></span>${t.status}
-            </span>
-          </td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // ── Refresh Tickets (simulated) ───────────────────────────────
-    function refreshTickets() {
-      const btn = document.getElementById('exec-refresh-btn');
-      const orig = btn.innerHTML;
-      btn.disabled  = true;
-      btn.innerHTML = 'Syncing…';
-      btn.classList.add('opacity-50','cursor-not-allowed');
-      setTimeout(() => {
-        // Simulate: reset cache from hardcoded data (no actual change)
-        state.ticketCache = null;
-        renderExecutionStage();
-        btn.innerHTML = '✓ Up to date';
-        setTimeout(() => { btn.innerHTML = orig; }, 2000);
-        btn.disabled = false;
-        btn.classList.remove('opacity-50','cursor-not-allowed');
-      }, 1000);
-    }
-
-    // ── Summary ───────────────────────────────────────────────────
-    function renderSummary() {
-      const order = ['business','product','tech'];
-      const ownerMap  = { business: 'wf-owner', product: 'wf-owner-p', tech: 'wf-owner-t' };
-      const sumOwner  = { business: 'sum-owner-b', product: 'sum-owner-p', tech: 'sum-owner-t' };
-
-      let allComplete = true;
-      order.forEach(s => {
-        const items   = STAGES[s].items;
-        const checked = items.filter(i => state.checks[s][i.id]).length;
-        const pct     = Math.round((checked / items.length) * 100);
-        document.getElementById('sum-pct-' + s).textContent = pct + '%';
-        const stStatus = state.stageStatus[s] === 'locked' ? 'locked' : (state.stageComplete[s] ? 'complete' : (checked > 0 ? 'in-progress' : 'not-started'));
-        setBadge('sum-badge-' + s, stStatus);
-        const ownerEl = document.getElementById(ownerMap[s]);
-        document.getElementById(sumOwner[s]).textContent = ownerEl ? ownerEl.textContent : '—';
-        if (!state.stageComplete[s]) allComplete = false;
-      });
-
-      const execCache  = state.ticketCache;
-      const tickets    = execCache ? execCache.tickets : [];
-      const doneCount  = tickets.filter(t => t.status === 'Done').length;
-      const execPct    = tickets.length ? Math.round((doneCount / tickets.length) * 100) : 0;
-      document.getElementById('sum-pct-execution').textContent = tickets.length ? `${doneCount}/${tickets.length}` : '—';
-      document.getElementById('sum-exec-sprint').textContent   = execCache ? execCache.sprint        : '—';
-      document.getElementById('sum-exec-est').textContent      = execCache ? execCache.estCompletion : '—';
-      setBadge('sum-badge-execution', state.stageStatus.execution === 'locked' ? 'locked' : state.stageStatus.execution);
-      if (state.stageStatus.execution === 'locked') allComplete = false;
-
-      // Restore approve button states
-      ['business','product','tech','execution'].forEach(s => {
-        const btn = document.getElementById('approve-' + s);
-        if (!btn) return;
-        if (state.approvals[s]) {
-          btn.textContent = '✓ Approved';
-          btn.className = 'w-full text-xs border border-green-300 rounded-lg py-1.5 font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors';
-        } else {
-          btn.textContent = 'Approve';
-          btn.className = 'w-full text-xs border border-gray-200 rounded-lg py-1.5 font-medium text-gray-600 hover:bg-gray-50 transition-colors';
-        }
-      });
-
-      // Banner
-      const banner = document.getElementById('summary-banner');
-      const icon   = document.getElementById('summary-banner-icon');
-      const title  = document.getElementById('summary-banner-title');
-      const sub    = document.getElementById('summary-banner-sub');
-      if (allComplete && execPct === 100) {
-        banner.className = 'rounded-xl p-6 mb-8 flex items-center gap-4 bg-green-50 border border-green-200';
-        icon.className   = 'w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 bg-green-100';
-        icon.textContent = '✓';
-        title.className  = 'text-xl font-bold text-green-800';
-        title.textContent = 'Ready for Development';
-        sub.className    = 'text-sm mt-0.5 opacity-80 text-green-700';
-        sub.textContent  = 'All stages are complete and the feature is cleared for development.';
-      } else {
-        banner.className = 'rounded-xl p-6 mb-8 flex items-center gap-4 bg-red-50 border border-red-200';
-        icon.className   = 'w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 bg-red-100';
-        icon.textContent = '✗';
-        title.className  = 'text-xl font-bold text-red-800';
-        title.textContent = 'Not Ready';
-        sub.className    = 'text-sm mt-0.5 opacity-80 text-red-700';
-        sub.textContent  = 'One or more stages have outstanding required items.';
-      }
-
-      // Missing items
-      const missing = document.getElementById('summary-missing');
-      missing.innerHTML = '';
-      order.forEach(s => {
-        STAGES[s].items.filter(i => i.required && !state.checks[s][i.id]).forEach(i => {
-          const li = document.createElement('li');
-          li.className = 'flex items-start gap-2';
-          li.innerHTML = `<span class="text-red-400 mt-0.5">•</span><span>[${STAGES[s].label}] ${i.label}</span>`;
-          missing.appendChild(li);
-        });
-      });
-      tickets.filter(t => t.status === 'Blocked' || t.status === 'On Hold').forEach(t => {
-        const li = document.createElement('li');
-        li.className = 'flex items-start gap-2';
-        li.innerHTML = `<span class="text-red-400 mt-0.5">•</span><span>[Execution] ${t.op_id} — ${t.title} (${t.status})</span>`;
+  // Missing items
+  const missing = document.getElementById('summary-missing');
+  missing.innerHTML='';
+  allGateKeys().forEach(b=>{
+    groupKeysFor(b).forEach(g=>{
+      allItems(b,g).filter(i=>i.required&&!state.checks[b][g][i.id]).forEach(i=>{
+        const li=document.createElement('li');
+        li.className='flex items-start gap-2';
+        li.innerHTML=`<span class="text-red-400 mt-0.5">•</span><span>[${STAGE_GROUPS[b].label} › ${STAGE_GROUPS[b].groups[g].label}] ${i.label}</span>`;
         missing.appendChild(li);
       });
-      if (!missing.children.length) missing.innerHTML = '<li class="text-green-600 text-xs">No missing required items.</li>';
+    });
+  });
+  tickets.filter(t=>t.status==='Blocked'||t.status==='On Hold').forEach(t=>{
+    const li=document.createElement('li');li.className='flex items-start gap-2';
+    li.innerHTML=`<span class="text-red-400 mt-0.5">•</span><span>[Execution] ${t.op_id} — ${t.title} (${t.status})</span>`;
+    missing.appendChild(li);
+  });
+  if (!missing.children.length) missing.innerHTML='<li class="text-green-600 text-xs">No missing required items.</li>';
 
-      // Risks
-      const risks = document.getElementById('summary-risks');
-      const riskData = {
-        business: 'Business objectives may not be fully validated with stakeholders.',
-        product:  'Edge cases and error states are under-documented, increasing QA risk.',
-        tech:     'Security and performance reviews may surface late-stage blockers.',
-      };
-      risks.innerHTML = '';
-      order.forEach(s => {
-        const li = document.createElement('li');
-        li.className = 'flex items-start gap-2';
-        li.innerHTML = `<span class="text-amber-400 mt-0.5">•</span><span>${riskData[s]}</span>`;
-        risks.appendChild(li);
-      });
-      const blockedCount = tickets.filter(t => t.status === 'Blocked').length;
-      if (blockedCount > 0) {
-        const li = document.createElement('li');
-        li.className = 'flex items-start gap-2';
-        li.innerHTML = `<span class="text-amber-400 mt-0.5">•</span><span>${blockedCount} ticket${blockedCount > 1 ? 's are' : ' is'} blocked in Execution — resolution needed to maintain delivery timeline.</span>`;
-        risks.appendChild(li);
-      }
+  // Risks
+  const risks = document.getElementById('summary-risks');
+  risks.innerHTML='';
+  const riskData=[
+    'Business objectives may not be fully validated with all stakeholders.',
+    'Compliance and legal reviews discovered late are costly to remediate.',
+    'Security and architecture reviews may surface late-stage blockers.',
+    'Edge cases and error states are under-documented, increasing QA risk.',
+    'Marketing GTM plan may not be aligned with the confirmed launch date.',
+  ];
+  riskData.forEach(r=>{
+    const li=document.createElement('li');li.className='flex items-start gap-2';
+    li.innerHTML=`<span class="text-amber-400 mt-0.5">•</span><span>${r}</span>`;
+    risks.appendChild(li);
+  });
+  const blockedCount=tickets.filter(t=>t.status==='Blocked').length;
+  if (blockedCount>0){
+    const li=document.createElement('li');li.className='flex items-start gap-2';
+    li.innerHTML=`<span class="text-amber-400 mt-0.5">•</span><span>${blockedCount} ticket${blockedCount>1?'s are':' is'} blocked in Execution.</span>`;
+    risks.appendChild(li);
+  }
+}
+
+// ── EXECUTION STAGE ───────────────────────────────────────────────────────
+const TICKET_STATUS_CFG = {
+  'Done':       {pill:'bg-green-100 text-green-700',  dot:'bg-green-500'},
+  'In Progress':{pill:'bg-blue-100 text-blue-700',    dot:'bg-blue-500'},
+  'In Review':  {pill:'bg-purple-100 text-purple-700',dot:'bg-purple-500'},
+  'New':        {pill:'bg-gray-100 text-gray-600',    dot:'bg-gray-400'},
+  'On Hold':    {pill:'bg-amber-100 text-amber-700',  dot:'bg-amber-400'},
+  'Blocked':    {pill:'bg-red-100 text-red-700',      dot:'bg-red-500'},
+};
+
+function renderExecutionStage() {
+  if (!state.activeRequest) return;
+  if (!state.ticketCache) {
+    const data = MOCK_TICKETS[state.activeRequest];
+    state.ticketCache = data ? JSON.parse(JSON.stringify(data)) : {sprint:'No Sprint',estCompletion:'—',tickets:[]};
+  }
+  const {sprint,estCompletion,tickets} = state.ticketCache;
+  document.getElementById('exec-sprint-label').textContent   = sprint;
+  document.getElementById('exec-est-completion').textContent = estCompletion;
+  const counts = {Done:0,'In Progress':0,'In Review':0,New:0,'On Hold':0,Blocked:0};
+  tickets.forEach(t=>{ if(counts[t.status]!==undefined) counts[t.status]++; });
+  const total = tickets.length;
+  const pct   = total ? Math.round((counts.Done/total)*100) : 0;
+  document.getElementById('exec-pct').textContent             = pct+'%';
+  document.getElementById('exec-pct-bar-label').textContent   = pct+'%';
+  document.getElementById('exec-progress-bar').style.width    = pct+'%';
+  document.getElementById('exec-count-done').textContent      = counts['Done'];
+  document.getElementById('exec-count-inprogress').textContent= counts['In Progress'];
+  document.getElementById('exec-count-inreview').textContent  = counts['In Review'];
+  document.getElementById('exec-count-onhold').textContent    = counts['On Hold'];
+  document.getElementById('exec-count-blocked').textContent   = counts['Blocked'];
+  document.getElementById('exec-count-new').textContent       = counts['New'];
+  let execStatus = pct===100?'complete':pct>0||counts['In Progress']>0||counts['In Review']>0?'in-progress':'not-started';
+  setBadge('badge-execution', execStatus);
+  setBadge('nav-badge-gate-execution', execStatus);
+  const tbody = document.getElementById('exec-ticket-rows');
+  tbody.innerHTML='';
+  tickets.forEach(t=>{
+    const cfg=TICKET_STATUS_CFG[t.status]||TICKET_STATUS_CFG['New'];
+    const tr=document.createElement('tr');
+    tr.className='hover:bg-gray-50 transition-colors';
+    tr.innerHTML=`<td class="px-4 py-3 font-mono text-xs text-gray-400 font-medium">${t.op_id}</td>
+      <td class="px-4 py-3 text-sm text-gray-800">${t.title}</td>
+      <td class="px-4 py-3 text-xs text-gray-500">${t.assignee}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.pill}"><span class="w-1.5 h-1.5 rounded-full ${cfg.dot}"></span>${t.status}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function refreshTickets() {
+  const btn=document.getElementById('exec-refresh-btn');
+  const orig=btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='Syncing…'; btn.classList.add('opacity-50','cursor-not-allowed');
+  setTimeout(()=>{ state.ticketCache=null; renderExecutionStage(); btn.innerHTML='✓ Up to date';
+    setTimeout(()=>{btn.innerHTML=orig;},2000); btn.disabled=false; btn.classList.remove('opacity-50','cursor-not-allowed'); },1000);
+}
+
+// ── AI PANEL ──────────────────────────────────────────────────────────────
+const AI_OPENERS = {
+  'business-strategy':    [{role:'ai',type:'suggestion',text:'Reviewing Strategy & Objectives. Ensure all goals are measurable — vague objectives make sign-off difficult downstream.'},{role:'ai',type:'warning',text:'Executive sponsor identification is often delayed. Lock this in before moving to other groups.'},{role:'ai',type:'risk',text:'Missing OKR alignment can lead to descoping under pressure. Document the link now.'}],
+  'business-compliance':  [{role:'ai',type:'suggestion',text:'Compliance & Legal active. Loop in legal early — compliance gaps discovered late are costly to fix.'},{role:'ai',type:'warning',text:'A DPIA is required if the feature touches personal data. Check with your DPO before proceeding.'},{role:'ai',type:'risk',text:'Contractual obligations identified late change the delivery risk profile significantly.'}],
+  'business-finance':     [{role:'ai',type:'suggestion',text:'Finance & Budget active. Budget approval should be in writing — verbal go-ahead is insufficient for audit.'},{role:'ai',type:'warning',text:'Confirm both CAPEX and OPEX implications have been reviewed, especially for third-party services.'},{role:'ai',type:'risk',text:'No cost centre assigned yet. Finance reporting will be inaccurate until this is set.'}],
+  'business-stakeholders':[{role:'ai',type:'suggestion',text:'Stakeholders active. A RACI matrix prevents accountability gaps — ensure every workstream has a DRI.'},{role:'ai',type:'warning',text:'Legal teams are the most commonly missed stakeholder. Confirm they are included.'},{role:'ai',type:'risk',text:'Without a documented escalation path, blockers tend to go unresolved.'}],
+  'product-userstories':  [{role:'ai',type:'suggestion',text:'User Stories active. Each story should map to at least one acceptance criterion QA can verify independently.'},{role:'ai',type:'warning',text:'Story point estimates without team agreement are noise. Confirm estimates in sprint planning.'},{role:'ai',type:'risk',text:'No rollback plan defined yet. Consider a feature flag strategy before committing to a release date.'}],
+  'product-design':       [{role:'ai',type:'suggestion',text:'Design & UX active. Approval should cover both happy path and error states — partial approvals cause rework.'},{role:'ai',type:'warning',text:'Accessibility review should happen at design stage, not after implementation. WCAG 2.1 AA is the baseline.'},{role:'ai',type:'risk',text:'Mobile layouts are commonly approved last — schedule this review early to avoid blocking QA.'}],
+  'product-edgecases':    [{role:'ai',type:'suggestion',text:'Edge Cases & Risks active. Common misses: empty states, concurrent users, slow networks, session expiry.'},{role:'ai',type:'warning',text:'Error states that are undocumented now will become bugs in production.'},{role:'ai',type:'risk',text:'Concurrent user scenarios are a common source of race conditions — flag to the Backend group.'}],
+  'tech-architecture':    [{role:'ai',type:'suggestion',text:'Architecture active. Review should cover scalability at 3x peak load, not just current traffic.'},{role:'ai',type:'warning',text:'An ADR ensures future engineers understand why decisions were made — publish it before dev starts.'},{role:'ai',type:'risk',text:'Undocumented service dependencies are a common source of production incidents.'}],
+  'tech-security':        [{role:'ai',type:'suggestion',text:'Security active. Infosec sign-off must be in writing — a Slack message is not sufficient.'},{role:'ai',type:'warning',text:'Threat modelling should happen before architecture is finalised, not after.'},{role:'ai',type:'risk',text:'Penetration tests should be scheduled at least 2 sprints before go-live to allow remediation.'}],
+  'tech-frontend':        [{role:'ai',type:'suggestion',text:'Frontend active. Component library compliance prevents long-term design system debt.'},{role:'ai',type:'warning',text:'Cross-browser testing should use your actual user base distribution from analytics.'},{role:'ai',type:'risk',text:'Core Web Vitals directly impact SEO and retention — set performance budgets before development starts.'}],
+  'tech-backend':         [{role:'ai',type:'suggestion',text:'Backend active. API contracts should be version-pinned — breaking changes without versioning cause incidents.'},{role:'ai',type:'warning',text:'Third-party rate limits are a common source of production surprises. Document limits and retry strategies.'},{role:'ai',type:'risk',text:'Background jobs that fail silently cause data inconsistency — ensure dead-letter queues are configured.'}],
+  'tech-qa':              [{role:'ai',type:'suggestion',text:'QA active. Test plan sign-off ensures coverage gaps are found before development completes, not after.'},{role:'ai',type:'warning',text:'E2E tests should cover critical user journeys, not just happy paths.'},{role:'ai',type:'risk',text:'An un-updated regression suite is a common source of silent breakage in existing functionality.'}],
+  'tech-techops':         [{role:'ai',type:'suggestion',text:'TechOps & Operations active. The runbook should cover the top 5 failure modes, not generic instructions.'},{role:'ai',type:'warning',text:'A rollback that has never been tested will fail when you need it most.'},{role:'ai',type:'risk',text:'Alert thresholds should be based on user impact, not raw metrics — avoid alert fatigue.'}],
+  'marketing-marketing':  [{role:'ai',type:'suggestion',text:'Marketing active. A GTM plan without a confirmed launch date is a draft, not a plan.'},{role:'ai',type:'warning',text:'Launch comms should be reviewed by both marketing and the product owner — messaging gaps surface here.'},{role:'ai',type:'risk',text:'Internal enablement materials are often left to the last minute — start them now to avoid day-one support issues.'}],
+};
+
+const AI_PROMPTS = {
+  'business-strategy':    ['Who is the executive sponsor?','Is this tied to an OKR?','What if the budget is cut?','What can you fill in for me?'],
+  'business-compliance':  ['Is a DPIA required?','What regulatory constraints apply?','Who is the DPO contact?','What can you fill in for me?'],
+  'business-finance':     ['What is the cost centre?','Are there ongoing OPEX costs?','What is the ROI case?','What can you fill in for me?'],
+  'business-stakeholders':['Who else should be on the RACI?','Who is the escalation point?','Has legal been included?','What can you fill in for me?'],
+  'product-userstories':  ['How do we handle session expiry?','What is the rollback plan?','Are stories independently testable?','What can you fill in for me?'],
+  'product-design':       ['Are error states designed?','Have mobile layouts been approved?','Has accessibility been reviewed?','What can you fill in for me?'],
+  'product-edgecases':    ['What happens on network failure?','Are concurrent users considered?','What are the empty states?','What can you fill in for me?'],
+  'tech-architecture':    ['What are the service dependencies?','Has peak load been modelled?','Is there an ADR?','What can you fill in for me?'],
+  'tech-security':        ['Has threat modelling been done?','When is the pen test scheduled?','How are secrets managed?','What can you fill in for me?'],
+  'tech-frontend':        ['What browsers are in scope?','Has the design system been checked?','What are the Web Vital targets?','What can you fill in for me?'],
+  'tech-backend':         ['What are the rate limits?','What is the retry strategy?','Are background jobs handled?','What can you fill in for me?'],
+  'tech-qa':              ['What is the E2E coverage?','When is regression scheduled?','Has UAT been planned?','What can you fill in for me?'],
+  'tech-techops':         ['Who is on-call?','Has the rollback been tested?','What alerts are configured?','What can you fill in for me?'],
+  'marketing-marketing':  ['When is the launch date?','Who approves the comms?','Is enablement ready?','What can you fill in for me?'],
+};
+
+let aiHistory = [];
+
+function updateAIPanel() {
+  const b = state.activeGate;
+  const g = state.activeGroup;
+  if (!b||!g) return;
+  const key = `${b}-${g}`;
+  aiHistory = [];
+  (AI_OPENERS[key]||[]).forEach(m=>aiHistory.push(m));
+  renderAIMessages();
+  renderAIPromptChips();
+}
+
+function renderAIMessages() {
+  const container=document.getElementById('ai-messages');
+  container.innerHTML='';
+  aiHistory.forEach((msg,idx)=>{
+    const wrap=document.createElement('div');
+    if (msg.role==='user') {
+      wrap.className='flex justify-end';
+      wrap.innerHTML=`<div class="max-w-[85%] bg-blue-600 text-white text-xs rounded-2xl rounded-tr-sm px-3.5 py-2.5 leading-relaxed">${msg.text}</div>`;
+    } else if (msg.type==='fill') {
+      let actionArea='';
+      if (msg.applied) actionArea=`<div class="mt-2.5 flex items-center gap-1.5 text-xs text-green-600 font-medium"><span class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center text-xs">✓</span>Applied to checklist</div>`;
+      else if (msg.discarded) actionArea=`<div class="mt-2 text-xs text-gray-400 italic">Dismissed</div>`;
+      else actionArea=`<div class="mt-2.5 bg-white border border-blue-100 rounded-lg px-3 py-2 text-xs text-gray-700 flex items-center gap-2"><span class="text-gray-400 line-through text-xs">☐</span><span class="text-blue-600 font-bold">☑</span><span class="truncate">${msg.action?msg.action.label:''}</span></div>
+        <div class="mt-2 flex gap-2"><button onclick="discardAIFill(${idx})" class="text-xs text-gray-400 hover:text-gray-600 px-2.5 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">Discard</button>
+        <button onclick="applyAIFill(${idx})" class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1">Apply <span>✓</span></button></div>`;
+      wrap.className='flex items-start gap-2';
+      wrap.innerHTML=`<div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">✦</div>
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[88%]">
+        <p class="text-xs font-semibold text-blue-600 mb-0.5">Write-back suggestion</p>
+        <p class="text-xs text-gray-700 leading-relaxed">${msg.text}</p>${actionArea}</div>`;
+    } else {
+      const typeBar={suggestion:'bg-blue-500',warning:'bg-amber-400',risk:'bg-red-500',tip:'bg-teal-400'};
+      const bar=msg.type?`<div class="w-0.5 rounded-full ${typeBar[msg.type]||'bg-gray-300'} self-stretch shrink-0"></div>`:'';
+      const typeColor=msg.type==='suggestion'?'text-blue-600':msg.type==='warning'?'text-amber-600':msg.type==='risk'?'text-red-600':msg.type==='tip'?'text-teal-600':'text-gray-500';
+      const label=msg.type?`<p class="text-xs font-semibold ${typeColor} mb-0.5 capitalize">${msg.type==='tip'?'Item Insight':msg.type}</p>`:'';
+      wrap.className='flex items-start gap-2';
+      wrap.innerHTML=`<div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">✦</div>
+        <div class="flex gap-2 bg-gray-50 border border-gray-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]">
+        ${bar}<div class="min-w-0">${label}<p class="text-xs text-gray-700 leading-relaxed">${msg.text}</p></div></div>`;
     }
+    container.appendChild(wrap);
+  });
+  container.scrollTop=container.scrollHeight;
+}
 
-    // ── AI Panel ──────────────────────────────────────────────────
-    const AI_OPENERS = {
-      business: [
-        { role: 'ai', type: 'suggestion', text: 'Hi! I\'m reviewing the Business stage. Make sure business objectives are measurable — vague goals make sign-off difficult downstream.' },
-        { role: 'ai', type: 'warning',    text: 'Stakeholder identification is often delayed. I\'d recommend locking in approvers before moving to Product stage.' },
-        { role: 'ai', type: 'risk',       text: 'No compliance requirements noted yet. Confirm with legal before proceeding — late discovery here causes costly rework.' },
-      ],
-      product: [
-        { role: 'ai', type: 'suggestion', text: 'Welcome to the Product stage. Map each user flow directly to an acceptance criterion — it makes QA handoff significantly smoother.' },
-        { role: 'ai', type: 'warning',    text: 'Edge cases for bulk or async actions are commonly missed. Double-check error states and empty states are documented.' },
-        { role: 'ai', type: 'risk',       text: 'No rollback plan defined yet. Consider a feature flag strategy before committing to a release date.' },
-      ],
-      tech: [
-        { role: 'ai', type: 'suggestion', text: 'Tech stage active. Document all third-party API rate limits now — they\'re a common source of production surprises.' },
-        { role: 'ai', type: 'warning',    text: 'Security review should be flagged before the architecture is finalised, not after. Loop in the security team early.' },
-        { role: 'ai', type: 'risk',       text: 'Performance impact on existing services is unassessed. I\'d recommend scheduling load tests before staging sign-off.' },
-      ],
-    };
+function renderAIPromptChips() {
+  const container=document.getElementById('ai-prompt-chips');
+  container.innerHTML='';
+  const key=`${state.activeGate}-${state.activeGroup}`;
+  (AI_PROMPTS[key]||[]).forEach(p=>{
+    const chip=document.createElement('button');
+    const isFill=p.toLowerCase().includes('fill');
+    chip.className=isFill?'text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-3 py-1 transition-colors font-medium flex items-center gap-1':'text-xs bg-gray-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-transparent text-gray-600 rounded-full px-3 py-1 transition-colors';
+    chip.innerHTML=isFill?`<span>✦</span> ${p}`:p;
+    chip.onclick=()=>sendAIMessage(p);
+    container.appendChild(chip);
+  });
+}
 
-    const AI_PROMPTS = {
-      business: ['Who are the executive sponsors?', 'What happens if budget is cut?', 'Is this tied to a contractual commitment?', 'What can you fill in for me?'],
-      product:  ['What happens if the user loses connection mid-flow?', 'Are there mobile-specific edge cases?', 'Has accessibility been considered?', 'What can you fill in for me?'],
-      tech:     ['What happens if the API is unavailable?', 'Are there data migration steps?', 'Who owns the on-call for this service?', 'What can you fill in for me?'],
-    };
+const CONFIRM_KEYWORDS=['yes','done','confirmed','completed','sorted','agreed','we have','already','covered','finished','complete'];
 
-    const AI_CANNED = {
-      business: {
-        default: [
-          'Good question. For the Business stage, I\'d focus on ensuring stakeholders have explicitly signed off on the success metrics — verbal alignment isn\'t enough.',
-          'That\'s worth flagging. Business requirements that lack a defined owner tend to drift. Assign a DRI for each objective.',
-          'I\'d recommend documenting this as a constraint in the checklist notes field so it\'s visible to downstream stages.',
-          'This could become a blocker if left unresolved. Consider scheduling a quick alignment call with the relevant stakeholders this week.',
-        ],
-        'executive sponsors': 'Executive sponsors should be identified at this stage. Without them, escalation paths for blockers are unclear.',
-        'budget': 'If budget is cut, the feature scope needs a defined fallback. Document the minimum viable version so the team knows what to descope first.',
-        'contractual': 'If this is tied to a contractual commitment, flag it explicitly as a constraint. It changes the risk profile significantly.',
-      },
-      product: {
-        default: [
-          'For the Product stage, ensure acceptance criteria are written in a way QA can verify independently — avoid ambiguous language like "works correctly".',
-          'That\'s a good point to raise. Error states are often spec\'d last and tested last — but they\'re the first thing users notice when something goes wrong.',
-          'I\'d suggest scheduling a design review before this moves to Tech. Late design changes are expensive to implement.',
-          'Rollback capability is worth defining now. A feature flag is the lowest-effort option and gives you a fast kill switch in production.',
-        ],
-        'connection': 'If the user loses connection mid-flow, the system should preserve their progress and provide a clear recovery path. Document this as an explicit error state.',
-        'mobile': 'Mobile-specific edge cases include touch targets, keyboard behaviour, and reduced screen real estate. If the product has a mobile surface, these should be in scope.',
-        'accessibility': 'Accessibility review should happen at the design stage, not after implementation. WCAG 2.1 AA is the standard baseline.',
-      },
-      tech: {
-        default: [
-          'For the Tech stage, the highest-risk items are usually undocumented API dependencies and untested edge cases under load. Start there.',
-          'That\'s worth capturing in the notes. Infrastructure surprises in staging are much cheaper to fix than in production.',
-          'I\'d recommend a threat modelling session if security hasn\'t been formally reviewed. It surfaces issues that code review typically misses.',
-          'Breaking changes should be flagged to all consumers of the affected service before this ships. Do you have a communication plan?',
-        ],
-        'api': 'If the API is unavailable, the system needs a graceful degradation strategy — either a cached fallback or a clear user-facing error.',
-        'migration': 'Data migration steps should be scripted, tested in staging, and reversible. Include a rollback script in the deployment plan.',
-        'on-call': 'On-call ownership should be defined before the feature ships. If it\'s a new service, update the runbook and alert routing accordingly.',
-      },
-    };
+function sendAIMessage(text) {
+  const input=document.getElementById('ai-input');
+  const msg=(text||input.value).trim();
+  if (!msg) return;
+  aiHistory.push({role:'user',text:msg});
+  if (input&&!text){input.value='';input.style.height='auto';}
+  renderAIMessages();
+  setTimeout(()=>{ const response=pickAIResponse(msg); aiHistory.push(typeof response==='string'?{role:'ai',text:response}:response); renderAIMessages(); },600);
+}
 
-    let aiHistory = [];
+function pickAIResponse(msg) {
+  const lower=msg.toLowerCase();
+  if (lower.includes('fill in')||lower.includes('fill for me')||lower.includes('autofill')||lower.includes('auto fill')) return buildFillOffer();
+  if (CONFIRM_KEYWORDS.some(kw=>lower.includes(kw))){ const f=buildFillOffer(); if(f&&typeof f==='object'&&f.type==='fill') return f; }
+  const fallbacks=[
+    'Good question. I\'d recommend documenting the answer in the notes field so it\'s visible to downstream reviewers.',
+    'That\'s worth flagging. Unresolved items here tend to become blockers in later groups.',
+    'I\'d recommend scheduling a quick alignment call with the relevant stakeholders this week.',
+    'Consider capturing this as a constraint in the checklist notes so it surfaces in the summary.',
+  ];
+  return fallbacks[aiHistory.filter(m=>m.role==='ai').length % fallbacks.length];
+}
 
-    function updateAIPanel() {
-      const stage = state.activeStage;
-      if (stage === 'execution') return;
-      aiHistory = [];
-      (AI_OPENERS[stage] || []).forEach(m => aiHistory.push(m));
-      renderAIMessages();
-      renderAIPromptChips();
-    }
+function buildFillOffer() {
+  const b=state.activeGate, g=state.activeGroup;
+  const items=allItems(b,g);
+  const uncheckedReq=items.filter(i=>i.required&&!state.checks[b]?.[g]?.[i.id]);
+  if (!uncheckedReq.length) return `All required items in ${STAGE_GROUPS[b].groups[g].label} are already checked. Looking good!`;
+  const pendingFills=aiHistory.filter(m=>m.type==='fill'&&!m.applied&&!m.discarded&&m.action?.gateId===b&&m.action?.groupId===g).map(m=>m.action?.itemId);
+  const target=uncheckedReq.find(i=>!pendingFills.includes(i.id));
+  if (!target) return `I've already suggested filling all remaining required items. Apply or discard those first.`;
+  return {role:'ai',type:'fill',text:`I can mark "${target.label}" as complete on your behalf. Apply below to check it off.`,action:{gateId:b,groupId:g,itemId:target.id,label:target.label}};
+}
 
-    function renderAIMessages() {
-      const container = document.getElementById('ai-messages');
-      container.innerHTML = '';
-      aiHistory.forEach((msg, idx) => {
-        const wrap = document.createElement('div');
-        if (msg.role === 'user') {
-          wrap.className = 'flex justify-end';
-          wrap.innerHTML = `<div class="max-w-[85%] bg-blue-600 text-white text-xs rounded-2xl rounded-tr-sm px-3.5 py-2.5 leading-relaxed">${msg.text}</div>`;
-        } else if (msg.type === 'fill') {
-          let actionArea = '';
-          if (msg.applied) {
-            actionArea = `<div class="mt-2.5 flex items-center gap-1.5 text-xs text-green-600 font-medium"><span class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xs">✓</span>Applied to checklist</div>`;
-          } else if (msg.discarded) {
-            actionArea = `<div class="mt-2 text-xs text-gray-400 italic">Dismissed</div>`;
-          } else {
-            actionArea = `
-              <div class="mt-2.5 bg-white border border-blue-100 rounded-lg px-3 py-2 text-xs text-gray-700 flex items-center gap-2">
-                <span class="text-gray-400 line-through text-xs">☐</span>
-                <span class="text-blue-600 font-bold">☑</span>
-                <span class="truncate">${msg.action ? msg.action.label : ''}</span>
-              </div>
-              <div class="mt-2 flex gap-2">
-                <button onclick="discardAIFill(${idx})" class="text-xs text-gray-400 hover:text-gray-600 px-2.5 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">Discard</button>
-                <button onclick="applyAIFill(${idx})" class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1">Apply <span>✓</span></button>
-              </div>`;
-          }
-          wrap.className = 'flex items-start gap-2';
-          wrap.innerHTML = `
-            <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">✦</div>
-            <div class="bg-blue-50 border border-blue-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[88%]">
-              <p class="text-xs font-semibold text-blue-600 mb-0.5">Write-back suggestion</p>
-              <p class="text-xs text-gray-700 leading-relaxed">${msg.text}</p>
-              ${actionArea}
-            </div>`;
-        } else {
-          const typeBar = { suggestion: 'bg-blue-500', warning: 'bg-amber-400', risk: 'bg-red-500' };
-          const bar = msg.type ? `<div class="w-0.5 rounded-full ${typeBar[msg.type] || 'bg-gray-300'} self-stretch shrink-0"></div>` : '';
-          const typeColor = msg.type === 'suggestion' ? 'text-blue-600' : msg.type === 'warning' ? 'text-amber-600' : msg.type === 'risk' ? 'text-red-600' : 'text-gray-500';
-          const label = msg.type ? `<p class="text-xs font-semibold ${typeColor} mb-0.5 capitalize">${msg.type}</p>` : '';
-          wrap.className = 'flex items-start gap-2';
-          wrap.innerHTML = `
-            <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">✦</div>
-            <div class="flex gap-2 bg-gray-50 border border-gray-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]">
-              ${bar}<div class="min-w-0">${label}<p class="text-xs text-gray-700 leading-relaxed">${msg.text}</p></div>
-            </div>`;
-        }
-        container.appendChild(wrap);
-      });
-      container.scrollTop = container.scrollHeight;
-    }
+function applyAIFill(msgIndex) {
+  const msg=aiHistory[msgIndex];
+  if (!msg?.action) return;
+  const {gateId,groupId,itemId}=msg.action;
+  state.checks[gateId][groupId][itemId]=true;
+  recomputeGroupStatus(gateId,groupId,true);
+  const chk=document.getElementById('chk-'+itemId);
+  if (chk){ chk.checked=true; const lbl=document.querySelector(`label[for="chk-${itemId}"]`); if(lbl){lbl.classList.add('line-through','text-gray-400');} }
+  msg.applied=true;
+  renderAIMessages();
+  flashRow(itemId);
+  setTimeout(()=>{ const next=buildFillOffer(); aiHistory.push(typeof next==='object'&&next.type==='fill'?next:{role:'ai',text:next}); renderAIMessages(); },900);
+}
 
-    function renderAIPromptChips() {
-      const container = document.getElementById('ai-prompt-chips');
-      container.innerHTML = '';
-      (AI_PROMPTS[state.activeStage] || []).forEach(p => {
-        const chip = document.createElement('button');
-        const isFill = p.toLowerCase().includes('fill');
-        chip.className = isFill
-          ? 'text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-3 py-1 transition-colors font-medium flex items-center gap-1'
-          : 'text-xs bg-gray-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-transparent text-gray-600 rounded-full px-3 py-1 transition-colors';
-        chip.innerHTML = isFill ? `<span>✦</span> ${p}` : p;
-        chip.onclick = () => sendAIMessage(p);
-        container.appendChild(chip);
-      });
-    }
+function discardAIFill(msgIndex) { const msg=aiHistory[msgIndex]; if(msg) msg.discarded=true; renderAIMessages(); }
 
-    const CONFIRM_KEYWORDS = ['yes','done','confirmed','completed','sorted','agreed','we have','already','covered','finished','complete'];
+function flashRow(itemId) {
+  const chk=document.getElementById('chk-'+itemId);
+  if (!chk) return;
+  const row=chk.closest('.px-4.py-3');
+  if (!row) return;
+  row.classList.add('row-flash');
+  setTimeout(()=>{ row.classList.remove('row-flash'); row.classList.add('row-flash-fade'); setTimeout(()=>row.classList.remove('row-flash-fade'),700); },1500);
+}
 
-    function sendAIMessage(text) {
-      const input = document.getElementById('ai-input');
-      const msg = (text || input.value).trim();
-      if (!msg) return;
-      aiHistory.push({ role: 'user', text: msg });
-      if (input && !text) { input.value = ''; input.style.height = 'auto'; }
-      renderAIMessages();
-      setTimeout(() => {
-        const response = pickAIResponse(msg);
-        aiHistory.push(typeof response === 'string' ? { role: 'ai', text: response } : response);
-        renderAIMessages();
-      }, 600);
-    }
+function toggleAIPanel() {
+  state.aiPanelOpen=!state.aiPanelOpen;
+  document.getElementById('ai-panel').classList.toggle('hidden',!state.aiPanelOpen);
+  document.getElementById('ai-panel-collapsed').classList.toggle('hidden',state.aiPanelOpen);
+}
 
-    function pickAIResponse(msg) {
-      const stage  = state.activeStage;
-      const canned = AI_CANNED[stage] || AI_CANNED.business;
-      const lower  = msg.toLowerCase();
-      if (lower.includes('fill in') || lower.includes('fill for me') || lower.includes('autofill') || lower.includes('auto fill')) return buildFillOffer(stage);
-      if (CONFIRM_KEYWORDS.some(kw => lower.includes(kw))) { const f = buildFillOffer(stage); if (f) return f; }
-      for (const [key, reply] of Object.entries(canned)) {
-        if (key === 'default') continue;
-        if (lower.includes(key)) return reply;
-      }
-      const defaults = canned.default || AI_CANNED.business.default;
-      return defaults[aiHistory.filter(m => m.role === 'ai').length % defaults.length];
-    }
+function autoResizeAI(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,96)+'px'; }
+function aiInputKeydown(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAIMessage();} }
 
-    function buildFillOffer(stage) {
-      const items = STAGES[stage]?.items || [];
-      const uncheckedRequired = items.filter(i => i.required && !state.checks[stage]?.[i.id]);
-      if (!uncheckedRequired.length) return `All required items in the ${STAGES[stage].label} stage are already checked. Looking good!`;
-      const pendingFills = aiHistory
-        .filter(m => m.type === 'fill' && !m.applied && !m.discarded && m.action?.stageId === stage)
-        .map(m => m.action?.itemId);
-      const target = uncheckedRequired.find(i => !pendingFills.includes(i.id));
-      if (!target) return `I've already suggested filling all remaining required items. Apply or discard those first.`;
-      return {
-        role: 'ai', type: 'fill',
-        text: `I can mark "${target.label}" as complete on your behalf. This is a required item in the ${STAGES[stage].label} stage. Apply below to check it off.`,
-        action: { stageId: stage, itemId: target.id, label: target.label }
-      };
-    }
+function onChecklistItemFocus(gateId,groupId,itemId) {
+  const tip=ITEM_TIPS[itemId];
+  if (!tip) return;
+  const alreadyShown=aiHistory.some(m=>m._itemId===itemId&&m.type==='tip');
+  if (alreadyShown) return;
+  aiHistory.push({role:'ai',type:'tip',_itemId:itemId,text:tip});
+  renderAIMessages();
+}
 
-    function applyAIFill(msgIndex) {
-      const msg = aiHistory[msgIndex];
-      if (!msg?.action) return;
-      const { stageId, itemId } = msg.action;
-      state.checks[stageId][itemId] = true;
-      updateStageStatus(stageId);
-      const chk = document.getElementById('chk-' + itemId);
-      if (chk) {
-        chk.checked = true;
-        const lbl = document.querySelector(`label[for="chk-${itemId}"]`);
-        if (lbl) { lbl.classList.add('line-through','text-gray-400'); }
-      }
-      msg.applied = true;
-      renderAIMessages();
-      flashRow(itemId);
-      setTimeout(() => {
-        const next = buildFillOffer(stageId);
-        aiHistory.push(typeof next === 'object' && next.type === 'fill' ? next : { role: 'ai', text: next });
-        renderAIMessages();
-      }, 900);
-    }
+// ── CONFIRMATION MODAL ────────────────────────────────────────────────────
+let _modalGateId=null, _modalGroupId=null, _modalItemId=null;
 
-    function discardAIFill(msgIndex) {
-      const msg = aiHistory[msgIndex];
-      if (!msg) return;
-      msg.discarded = true;
-      renderAIMessages();
-    }
+function showConfirmModal(gateId, groupId, itemId) {
+  _modalGateId=gateId; _modalGroupId=groupId; _modalItemId=itemId;
+  const items=allItems(gateId,groupId);
+  const item=items.find(i=>i.id===itemId);
+  document.getElementById('modal-item-label').textContent=item?item.label:itemId;
+  const tipEl=document.getElementById('modal-ai-tip');
+  const tipTxt=ITEM_TIPS[itemId];
+  if (tipTxt){ tipEl.textContent='✦  '+tipTxt; tipEl.classList.remove('hidden'); } else { tipEl.classList.add('hidden'); }
+  const textarea=document.getElementById('modal-confirmation-text');
+  textarea.value='';
+  document.getElementById('modal-input-error').classList.add('hidden');
+  document.getElementById('modal-confirm-btn').disabled=true;
+  document.getElementById('confirm-modal').classList.remove('hidden');
+  setTimeout(()=>textarea.focus(),50);
+}
 
-    function flashRow(itemId) {
-      const chk = document.getElementById('chk-' + itemId);
-      if (!chk) return;
-      const row = chk.closest('.px-4.py-3');
-      if (!row) return;
-      row.classList.add('row-flash');
-      setTimeout(() => {
-        row.classList.remove('row-flash');
-        row.classList.add('row-flash-fade');
-        setTimeout(() => row.classList.remove('row-flash-fade'), 700);
-      }, 1500);
-    }
+function onModalInput() {
+  const val=document.getElementById('modal-confirmation-text').value.trim();
+  document.getElementById('modal-confirm-btn').disabled=val.length===0;
+  if (val.length>0) document.getElementById('modal-input-error').classList.add('hidden');
+}
 
-    function toggleAIPanel() {
-      state.aiPanelOpen = !state.aiPanelOpen;
-      document.getElementById('ai-panel').classList.toggle('hidden', !state.aiPanelOpen);
-      document.getElementById('ai-panel-collapsed').classList.toggle('hidden', state.aiPanelOpen);
-    }
+function confirmCheck() {
+  const text=document.getElementById('modal-confirmation-text').value.trim();
+  if (!text){ document.getElementById('modal-input-error').classList.remove('hidden'); return; }
+  const b=_modalGateId, g=_modalGroupId, itemId=_modalItemId;
+  cancelModal();
+  state.checks[b][g][itemId]=true;
+  if (!state.notes[b]) state.notes[b]={};
+  if (!state.notes[b][g]) state.notes[b][g]={};
+  state.notes[b][g][itemId]=text;
+  const chk=document.getElementById('chk-'+itemId);
+  if (chk){ chk.checked=true; const lbl=document.querySelector(`label[for="chk-${itemId}"]`); if(lbl){lbl.classList.add('line-through','text-gray-400');}
+    const noteInput=chk.closest('.px-4.py-3')?.querySelector('input[type="text"]');
+    if (noteInput) noteInput.value=text;
+  }
+  flashRow(itemId);
+  recomputeGroupStatus(b,g,true);
+  const followup=ITEM_FOLLOWUPS[itemId];
+  if (followup){ setTimeout(()=>{ aiHistory.push({role:'ai',type:'suggestion',text:followup}); renderAIMessages(); },500); }
+}
 
-    function autoResizeAI(el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 96) + 'px';
-    }
+function cancelModal() {
+  document.getElementById('confirm-modal').classList.add('hidden');
+  if (_modalItemId){ const chk=document.getElementById('chk-'+_modalItemId); if(chk) chk.checked=false; }
+  _modalGateId=null; _modalGroupId=null; _modalItemId=null;
+}
 
-    function aiInputKeydown(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAIMessage(); }
-    }
+// ── PROGRESS OVERVIEW ────────────────────────────────────────────────────
+function renderProgress() {
+  const req = requests.find(r => r.id === state.activeRequest);
+  document.getElementById('progress-feature-title').textContent = req ? req.title : '—';
 
-    // ── Bootstrap ─────────────────────────────────────────────────
-    loadDashboard();
-  </script>
+  // Compute overall pct across all gate groups
+  let totalItems = 0, totalDone = 0;
+  allGateKeys().forEach(b => {
+    groupKeysFor(b).forEach(g => {
+      const items  = allItems(b, g);
+      const checks = state.checks[b][g] || {};
+      totalItems += items.length;
+      totalDone  += items.filter(i => checks[i.id]).length;
+    });
+  });
+  const overallPct = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
+  document.getElementById('progress-overall-pct').textContent = overallPct + '%';
+  document.getElementById('progress-overall-bar').style.width = overallPct + '%';
+  const overallStatus = overallPct === 100 ? 'complete' : overallPct > 0 ? 'in-progress' : 'not-started';
+  setBadge('progress-overall-badge', overallStatus);
+
+  const container = document.getElementById('progress-gates');
+  container.innerHTML = '';
+
+  allGateKeys().forEach(b => {
+    const gateDef = STAGE_GROUPS[b];
+    const groups  = groupKeysFor(b);
+
+    // Gate aggregate pct
+    let gTotalItems = 0, gTotalDone = 0;
+    groups.forEach(g => {
+      const items  = allItems(b, g);
+      const checks = state.checks[b][g] || {};
+      gTotalItems += items.length;
+      gTotalDone  += items.filter(i => checks[i.id]).length;
+    });
+    const gatePct    = gTotalItems ? Math.round((gTotalDone / gTotalItems) * 100) : 0;
+    const gateStatus = groups.every(g => state.groupStatus[b][g] === 'complete') ? 'complete'
+                     : groups.some(g  => state.groupStatus[b][g] !== 'not-started') ? 'in-progress'
+                     : 'not-started';
+
+    const barColor = gateStatus === 'complete' ? 'bg-green-500' : 'bg-blue-500';
+    const section  = document.createElement('div');
+    section.className = 'bg-white border border-gray-200 rounded-xl overflow-hidden';
+
+    let html = `
+      <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-3">
+        <span class="text-base">${gateDef.icon}</span>
+        <span class="font-semibold text-gray-800 flex-1">${gateDef.label}</span>
+        <div class="flex items-center gap-3">
+          <div class="w-32 bg-gray-100 rounded-full h-2">
+            <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width:${gatePct}%"></div>
+          </div>
+          <span class="text-sm font-semibold text-gray-700 tabular-nums w-10 text-right">${gatePct}%</span>
+          <span id="prog-badge-gate-${b}" class="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500"></span>
+        </div>
+      </div>
+      <div class="divide-y divide-gray-50">`;
+
+    groups.forEach(g => {
+      const gDef   = gateDef.groups[g];
+      const items  = allItems(b, g);
+      const checks = state.checks[b][g] || {};
+      const done   = items.filter(i => checks[i.id]).length;
+      const total  = items.length;
+      const pct    = total ? Math.round((done / total) * 100) : 0;
+      const st     = state.groupStatus[b][g];
+      const reqMissing = items.filter(i => i.required && !checks[i.id]).length;
+      const dotColor   = st === 'complete' ? 'bg-green-500' : st === 'in-progress' ? 'bg-amber-400' : 'bg-gray-300';
+      const groupBarColor = st === 'complete' ? 'bg-green-500' : 'bg-blue-400';
+
+      html += `
+        <div class="px-5 py-3 flex items-center gap-4 hover:bg-blue-50 cursor-pointer transition-colors group" onclick="loadAndSwitchToGroup('${b}','${g}')">
+          <span class="w-2 h-2 rounded-full ${dotColor} shrink-0 ml-3"></span>
+          <span class="text-sm text-gray-700 w-48 shrink-0 group-hover:text-blue-700 transition-colors">${gDef.label}</span>
+          <div class="flex-1 flex items-center gap-3">
+            <div class="flex-1 bg-gray-100 rounded-full h-1.5">
+              <div class="${groupBarColor} h-1.5 rounded-full transition-all duration-300" style="width:${pct}%"></div>
+            </div>
+            <span class="text-xs text-gray-500 tabular-nums w-8 text-right">${pct}%</span>
+          </div>
+          <span class="text-xs text-gray-400 w-28 text-right shrink-0">${done}/${total} items</span>
+          <span class="text-xs shrink-0 w-32 text-right ${reqMissing > 0 ? 'text-red-500' : 'text-green-600'}">${reqMissing > 0 ? reqMissing + ' required missing' : '✓ Required done'}</span>
+          <span class="text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Open →</span>
+        </div>`;
+    });
+
+    html += '</div>';
+    section.innerHTML = html;
+    container.appendChild(section);
+    setBadge('prog-badge-gate-' + b, gateStatus);
+  });
+
+  // Execution row
+  const execCache  = state.ticketCache;
+  const tickets    = execCache ? execCache.tickets : [];
+  const doneCount  = tickets.filter(t => t.status === 'Done').length;
+  const execPct    = tickets.length ? Math.round((doneCount / tickets.length) * 100) : 0;
+  const execStatus = execPct === 100 ? 'complete' : execPct > 0 ? 'in-progress' : 'not-started';
+  const execSection = document.createElement('div');
+  execSection.className = 'bg-white border border-gray-200 rounded-xl overflow-hidden';
+  execSection.innerHTML = `
+    <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-3">
+      <span class="text-base">🚀</span>
+      <span class="font-semibold text-gray-800 flex-1">Execution</span>
+      <div class="flex items-center gap-3">
+        <div class="w-32 bg-gray-100 rounded-full h-2">
+          <div class="${execStatus === 'complete' ? 'bg-green-500' : 'bg-blue-500'} h-2 rounded-full" style="width:${execPct}%"></div>
+        </div>
+        <span class="text-sm font-semibold text-gray-700 tabular-nums w-10 text-right">${execPct}%</span>
+        <span id="prog-badge-gate-execution" class="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500"></span>
+      </div>
+    </div>
+    <div class="px-5 py-3 flex items-center gap-6 text-xs text-gray-500 hover:bg-blue-50 cursor-pointer transition-colors" onclick="loadAndSwitchToGroup('execution',null)">
+      <span class="ml-3">${doneCount}/${tickets.length} tickets done</span>
+      <span>Sprint: ${execCache ? execCache.sprint : '—'}</span>
+      <span>Est: ${execCache ? execCache.estCompletion : '—'}</span>
+      <span class="ml-auto text-blue-500">Open →</span>
+    </div>`;
+  container.appendChild(execSection);
+  setBadge('prog-badge-gate-execution', execStatus);
+}
+
+function loadAndSwitchToGroup(gateId, groupId) {
+  showView('workflow');
+  switchGate(gateId);
+  if (groupId) switchGroup(gateId, groupId);
+}
+
+// ── BOOTSTRAP ─────────────────────────────────────────────────────────────
+loadDashboard();
+</script>
+
+<!-- CONFIRMATION MODAL -->
+<div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cancelModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 flex flex-col gap-4">
+    <div class="flex items-start gap-3">
+      <div class="w-9 h-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+        <span class="text-blue-600 font-bold text-sm">✦</span>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-0.5">AI Auditor · Confirmation Required</p>
+        <h3 class="text-sm font-semibold text-gray-900" id="modal-item-label">Checklist item</h3>
+      </div>
+    </div>
+    <div id="modal-ai-tip" class="hidden bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-gray-700 leading-relaxed"></div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">How was this confirmed? <span class="text-red-500">*</span></label>
+      <textarea id="modal-confirmation-text" rows="3" placeholder="e.g. Reviewed with Priya S. on 3 May — signed off in Confluence..."
+        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-300"
+        oninput="onModalInput()"></textarea>
+      <p id="modal-input-error" class="hidden text-xs text-red-500 mt-1">Please describe how this was confirmed before checking it off.</p>
+    </div>
+    <div class="flex gap-2.5 pt-1">
+      <button id="modal-confirm-btn" onclick="confirmCheck()" disabled
+        class="flex-1 bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5">
+        <span>✓</span> Confirm &amp; Check
+      </button>
+      <button onclick="cancelModal()" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">Cancel</button>
+    </div>
+    <p class="text-xs text-gray-400 text-center -mt-1">Your confirmation will be saved as a note on this item.</p>
+  </div>
+</div>
 
 </body>
 </html>
