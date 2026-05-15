@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="checklist_config.js"></script>
+  <script src="feature_types.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .view { display: none; }
@@ -59,6 +60,7 @@
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature</th>
+            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Type</th>
             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Active Gate</th>
             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Progress</th>
             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Owner</th>
@@ -86,79 +88,341 @@
     </div>
     <button onclick="showView('dashboard')" class="text-gray-500 hover:text-gray-800 text-sm font-medium">← Dashboard</button>
   </nav>
+
   <main class="max-w-2xl mx-auto px-6 py-10">
     <div class="mb-6">
       <h1 class="text-xl font-semibold text-gray-900 mb-1">New Readiness Request</h1>
-      <p class="text-gray-500">Fill in the details below to kick off a readiness review.</p>
+      <p class="text-gray-500 text-sm">First, classify your change to determine if project initiation is required.</p>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Title <span class="text-red-500">*</span></label>
-        <input id="create-title" type="text" placeholder="e.g. SSO Integration" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+
+    <!-- ── STEP 1: CLASSIFICATION ──────────────────────────────────────── -->
+    <div class="mb-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+        <span class="text-sm font-semibold text-gray-800">What kind of change is this?</span>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Business Goal <span class="text-red-500">*</span></label>
-        <textarea id="create-goal" rows="3" placeholder="Describe the business objective this feature addresses..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+
+      <!-- Type cards grid -->
+      <div id="create-type-grid" class="grid grid-cols-2 gap-2.5"></div>
+
+      <!-- Override questions (injected here by JS) -->
+      <div id="create-override-questions" class="hidden mt-4 bg-white border border-gray-200 rounded-xl p-5 space-y-4"></div>
+
+      <!-- Classification verdict -->
+      <div id="create-verdict" class="hidden mt-4"></div>
+    </div>
+
+    <!-- ── STEP 2: REQUEST DETAILS (shown only when initiation is required) -->
+    <div id="create-details-section" class="hidden">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+        <span class="text-sm font-semibold text-gray-800">Request Details</span>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Success Metrics <span class="text-red-500">*</span></label>
-        <input id="create-metrics" type="text" placeholder="e.g. Reduce login time by 40%, 95% adoption in 30 days" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-      </div>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Owner <span class="text-red-500">*</span></label>
-          <select id="create-owner" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-            <option value="">Select owner...</option>
-            <option>Priya S.</option>
-            <option>James K.</option>
-            <option>Aisha M.</option>
-            <option>Tom R.</option>
-            <option>Dana L.</option>
-          </select>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Feature / Change Title <span class="text-red-500">*</span></label>
+          <input id="create-title" type="text" placeholder="e.g. SSO Integration" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Target Quarter <span class="text-red-500">*</span></label>
-          <select id="create-quarter" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-            <option value="">Select quarter...</option>
-            <option>Q1 2026</option>
-            <option>Q2 2026</option>
-            <option>Q3 2026</option>
-            <option>Q4 2026</option>
-          </select>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Business Goal <span class="text-red-500">*</span></label>
+          <textarea id="create-goal" rows="3" placeholder="Describe the objective this change addresses..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
         </div>
-      </div>
-      <!-- Sign-off Mode -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Group Completion Mode <span class="text-red-500">*</span></label>
-        <p class="text-xs text-gray-400 mb-3">Controls how sub-groups are marked complete across all gates in this request.</p>
-        <div class="grid grid-cols-2 gap-3">
-          <label class="relative flex items-start gap-3 border rounded-xl p-4 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
-            <input type="radio" name="signoff-mode" value="auto" checked class="mt-0.5 text-blue-600 focus:ring-blue-500" />
-            <div>
-              <p class="text-sm font-medium text-gray-800">Auto-detect</p>
-              <p class="text-xs text-gray-500 mt-0.5">Group marked complete automatically when all required items are checked.</p>
-            </div>
-          </label>
-          <label class="relative flex items-start gap-3 border rounded-xl p-4 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
-            <input type="radio" name="signoff-mode" value="manual" class="mt-0.5 text-blue-600 focus:ring-blue-500" />
-            <div>
-              <p class="text-sm font-medium text-gray-800">Manual sign-off</p>
-              <p class="text-xs text-gray-500 mt-0.5">A "Sign off group" button appears — someone must explicitly approve each group.</p>
-            </div>
-          </label>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Success Metrics <span class="text-red-500">*</span></label>
+          <input id="create-metrics" type="text" placeholder="e.g. Reduce login time by 40%, 95% adoption in 30 days" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
         </div>
-      </div>
-      <div id="create-error" class="hidden text-red-600 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2">Please fill in all required fields before submitting.</div>
-      <div class="flex gap-3 pt-2">
-        <button onclick="submitCreateRequest()" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Start Readiness Review →</button>
-        <button onclick="showView('dashboard')" class="bg-white text-gray-600 border border-gray-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Cancel</button>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Owner <span class="text-red-500">*</span></label>
+            <select id="create-owner" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+              <option value="">Select owner...</option>
+              <option>Priya S.</option>
+              <option>James K.</option>
+              <option>Aisha M.</option>
+              <option>Tom R.</option>
+              <option>Dana L.</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Target Quarter <span class="text-red-500">*</span></label>
+            <select id="create-quarter" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+              <option value="">Select quarter...</option>
+              <option>Q1 2026</option>
+              <option>Q2 2026</option>
+              <option>Q3 2026</option>
+              <option>Q4 2026</option>
+            </select>
+          </div>
+        </div>
+        <!-- Sign-off Mode -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Group Completion Mode <span class="text-red-500">*</span></label>
+          <p class="text-xs text-gray-400 mb-3">Controls how sub-groups are marked complete across all gates in this request.</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="relative flex items-start gap-3 border rounded-xl p-4 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <input type="radio" name="signoff-mode" value="auto" checked class="mt-0.5 text-blue-600 focus:ring-blue-500" />
+              <div>
+                <p class="text-sm font-medium text-gray-800">Auto-detect</p>
+                <p class="text-xs text-gray-500 mt-0.5">Group marked complete automatically when all required items are checked.</p>
+              </div>
+            </label>
+            <label class="relative flex items-start gap-3 border rounded-xl p-4 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <input type="radio" name="signoff-mode" value="manual" class="mt-0.5 text-blue-600 focus:ring-blue-500" />
+              <div>
+                <p class="text-sm font-medium text-gray-800">Manual sign-off</p>
+                <p class="text-xs text-gray-500 mt-0.5">A "Sign off group" button appears — someone must explicitly approve each group.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div id="create-error" class="hidden text-red-600 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2">Please fill in all required fields before submitting.</div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="submitCreateRequest()" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Start Readiness Review →</button>
+          <button onclick="showView('dashboard')" class="bg-white text-gray-600 border border-gray-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Cancel</button>
+        </div>
       </div>
     </div>
   </main>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     VIEW 3 · WORKFLOW — nav + sidebar
+     VIEW 3 · AI INTAKE FORM
+═══════════════════════════════════════════════════════════════ -->
+<div id="view-intake" class="view">
+  <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      </div>
+      <span class="font-semibold text-gray-900 text-base">ReadyOps</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="intake-mode-badge" class="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200">✦ AI Intake</span>
+      <button id="intake-back-btn" onclick="intakeGoBack()" class="text-gray-500 hover:text-gray-800 text-sm font-medium">← Back</button>
+    </div>
+  </nav>
+
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="mb-6">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+          <span class="text-white font-bold text-sm">✦</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-semibold text-gray-900" id="intake-heading">AI-Assisted Intake</h1>
+          <p class="text-sm text-gray-500" id="intake-subheading">Describe your feature so the AI can evaluate and pre-fill your readiness checklist.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form + Results layout -->
+    <div class="flex gap-6 items-start">
+
+      <!-- LEFT: Intake Form -->
+      <div id="intake-form-col" class="flex-1 min-w-0 space-y-5">
+
+        <!-- Feature goal -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+            <span class="text-sm font-semibold text-gray-800">Feature Context</span>
+            <span class="text-xs text-gray-400">Used across all gates</span>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Feature Goal <span class="text-red-500">*</span></label>
+            <textarea id="intake-goal" rows="3" placeholder="What does this feature achieve, and for whom? What problem does it solve?"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-300"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Success Metrics</label>
+            <input id="intake-metrics" type="text" placeholder="e.g. Reduce login time by 40%, 95% adoption in 30 days"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-300" />
+          </div>
+        </div>
+
+        <!-- Technical approach -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+            <span class="text-sm font-semibold text-gray-800">Technical Details</span>
+            <span class="text-xs text-gray-400">Informs Tech gate</span>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Technical Approach</label>
+            <textarea id="intake-tech" rows="3" placeholder="Key tech decisions, architecture choices, services or APIs involved..."
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-300"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">External Dependencies</label>
+            <textarea id="intake-deps" rows="2" placeholder="Third-party systems, partner APIs, shared infrastructure..."
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-300"></textarea>
+          </div>
+        </div>
+
+        <!-- Compliance & Risk -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+            <span class="text-sm font-semibold text-gray-800">Compliance & Risk</span>
+            <span class="text-xs text-gray-400">Informs Business gate</span>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Compliance Concerns</label>
+            <textarea id="intake-compliance" rows="2" placeholder="Data privacy, regulatory requirements, legal considerations..."
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-300"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Timeline Pressure</label>
+            <div class="flex gap-2">
+              <label class="flex-1 flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-colors">
+                <input type="radio" name="intake-timeline" value="low" class="text-blue-600 focus:ring-blue-500" />
+                <span class="text-sm text-gray-700">Low</span>
+              </label>
+              <label class="flex-1 flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-colors">
+                <input type="radio" name="intake-timeline" value="medium" checked class="text-blue-600 focus:ring-blue-500" />
+                <span class="text-sm text-gray-700">Medium</span>
+              </label>
+              <label class="flex-1 flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-colors">
+                <input type="radio" name="intake-timeline" value="high" class="text-blue-600 focus:ring-blue-500" />
+                <span class="text-sm text-gray-700">High</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Affected Teams</label>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-colors">
+                <input type="checkbox" name="intake-teams" value="business" class="text-blue-600 focus:ring-blue-500" checked />
+                <span class="text-sm text-gray-700">🏢 Business</span>
+              </label>
+              <label class="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-colors">
+                <input type="checkbox" name="intake-teams" value="product" class="text-blue-600 focus:ring-blue-500" checked />
+                <span class="text-sm text-gray-700">📦 Product</span>
+              </label>
+              <label class="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-colors">
+                <input type="checkbox" name="intake-teams" value="tech" class="text-blue-600 focus:ring-blue-500" checked />
+                <span class="text-sm text-gray-700">⚙️ Tech</span>
+              </label>
+              <label class="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-colors">
+                <input type="checkbox" name="intake-teams" value="marketing" class="text-blue-600 focus:ring-blue-500" />
+                <span class="text-sm text-gray-700">📣 Marketing</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Free text -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Anything else the AI should know?</label>
+          <textarea id="intake-freetext" rows="3" placeholder="Additional context, decisions already made, constraints, stakeholder notes..."
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-300"></textarea>
+        </div>
+
+        <div id="intake-form-error" class="hidden text-red-600 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2">Please describe the feature goal before evaluating.</div>
+
+        <!-- Evaluate button -->
+        <button id="intake-evaluate-btn" onclick="submitIntakeEvaluation()"
+          class="w-full bg-blue-600 text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+          <span id="intake-btn-icon">✦</span>
+          <span id="intake-btn-label">Evaluate & Auto-fill →</span>
+        </button>
+
+        <button onclick="skipIntakeAndProceed()" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 transition-colors py-1">
+          Skip AI evaluation — go straight to checklist
+        </button>
+      </div>
+
+      <!-- RIGHT: Results panel (hidden until AI finishes) -->
+      <div id="intake-results-col" class="hidden w-72 shrink-0 space-y-4">
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+              <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <span class="text-sm font-semibold text-gray-800">AI Evaluation Complete</span>
+          </div>
+          <p class="text-xs text-gray-500 mb-4" id="intake-results-summary"></p>
+          <div id="intake-results-gates" class="space-y-2 mb-4"></div>
+          <button onclick="applyIntakeFills()" id="intake-apply-btn"
+            class="w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5">
+            Apply to Checklist →
+          </button>
+          <button onclick="skipIntakeAndProceed()" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 transition-colors mt-2 py-1">
+            Discard and go to checklist
+          </button>
+        </div>
+
+        <!-- AI confidence note -->
+        <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700 leading-relaxed">
+          <p class="font-semibold mb-1">How AI fills items</p>
+          <p>The AI maps your intake answers to individual checklist items and pre-fills notes with relevant context. Required items are only checked when there is high confidence. You can review and override any suggestion in the checklist.</p>
+        </div>
+      </div>
+
+      <!-- RESUME SUMMARY PANEL (shown for returning visits, hidden otherwise) -->
+      <div id="intake-resume-panel" class="hidden w-full max-w-xl mx-auto space-y-4">
+
+        <!-- Overall progress card -->
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <!-- Feature header -->
+          <div class="px-6 py-5 border-b border-gray-100">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900" id="resume-feature-title">Feature</h2>
+                <p class="text-xs text-gray-500 mt-0.5" id="resume-feature-meta">Owner · Active gate</p>
+              </div>
+              <span id="resume-signoff-badge" class="text-xs px-2.5 py-1 rounded-full font-medium border shrink-0 mt-0.5"></span>
+            </div>
+            <!-- Overall progress bar -->
+            <div class="mt-4">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-medium text-gray-500">Overall Progress</span>
+                <span class="text-xs font-semibold text-gray-700" id="resume-overall-pct">0%</span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div id="resume-overall-bar" class="h-2 rounded-full transition-all duration-500 bg-blue-500" style="width:0%"></div>
+              </div>
+              <p class="text-xs text-gray-400 mt-1.5" id="resume-overall-counts"></p>
+            </div>
+          </div>
+
+          <!-- Per-gate breakdown -->
+          <div id="resume-gate-rows" class="divide-y divide-gray-100"></div>
+
+          <!-- Required missing notice -->
+          <div id="resume-missing-notice" class="hidden px-6 py-3 bg-amber-50 border-t border-amber-100 flex items-center gap-2">
+            <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <span class="text-xs text-amber-700 font-medium" id="resume-missing-text"></span>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="space-y-2.5">
+          <button onclick="enterWorkflow()"
+            class="w-full bg-blue-600 text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+            Continue where I left off →
+          </button>
+          <button onclick="showIntakeForm('reevaluate')"
+            class="w-full bg-white text-blue-600 border border-blue-200 px-5 py-3 rounded-xl text-sm font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+            <span>✦</span> Run AI Evaluation
+          </button>
+        </div>
+
+        <!-- AI context note — only shown if prior intake answers exist -->
+        <div id="resume-prior-ai-note" class="hidden bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-start gap-3">
+          <span class="text-blue-500 font-bold text-sm shrink-0 mt-0.5">✦</span>
+          <div>
+            <p class="text-xs font-semibold text-blue-700 mb-0.5">Previous AI evaluation available</p>
+            <p class="text-xs text-blue-600">Your last intake answers are pre-loaded. Click "Run AI Evaluation" to review and re-apply them.</p>
+          </div>
+        </div>
+
+      </div><!-- end resume panel -->
+
+    </div><!-- end flex -->
+  </div><!-- end max-w container -->
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VIEW 4 · WORKFLOW — nav + sidebar
 ═══════════════════════════════════════════════════════════════ -->
 <div id="view-workflow" class="view">
   <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -170,6 +434,7 @@
     </div>
     <div class="flex items-center gap-4">
       <span id="wf-signoff-mode-badge" class="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 font-medium border border-gray-200"></span>
+      <button onclick="showIntakeForm('reevaluate')" class="text-xs bg-blue-600 text-white border border-blue-600 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-1.5"><span>✦</span> Re-run AI</button>
       <button onclick="showView('progress')" class="text-xs bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg font-medium hover:bg-gray-200 transition-colors">Progress ↗</button>
       <button onclick="showView('summary')" class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-100 transition-colors">View Summary →</button>
       <button onclick="showView('dashboard')" class="text-gray-500 hover:text-gray-800 text-sm font-medium">← Dashboard</button>
@@ -379,10 +644,10 @@
 <script>
 // ── MOCK DATA ─────────────────────────────────────────────────────────────
 const MOCK_REQUESTS = [
-  { id:'r1', title:'SSO Integration',     owner:'Priya S.',  risk:'Dependency',         dashboard_stage:'Tech',     dashboard_progress:52, signoffMode:'manual' },
-  { id:'r2', title:'Bulk Export',         owner:'James K.',  risk:'Missing edge cases', dashboard_stage:'Product',  dashboard_progress:30, signoffMode:'auto'   },
-  { id:'r3', title:'Role-Based Access',   owner:'Aisha M.',  risk:'Blocker',            dashboard_stage:'Business', dashboard_progress:10, signoffMode:'auto'   },
-  { id:'r4', title:'Analytics Dashboard', owner:'Tom R.',    risk:'',                   dashboard_stage:'Ready',    dashboard_progress:100,signoffMode:'manual' },
+  { id:'r1', title:'SSO Integration',     owner:'Priya S.',  risk:'Dependency',         dashboard_stage:'Tech',     dashboard_progress:52,  signoffMode:'manual', _seenIntake:true },
+  { id:'r2', title:'Bulk Export',         owner:'James K.',  risk:'Missing edge cases', dashboard_stage:'Product',  dashboard_progress:30,  signoffMode:'auto',   _seenIntake:true },
+  { id:'r3', title:'Role-Based Access',   owner:'Aisha M.',  risk:'Blocker',            dashboard_stage:'Business', dashboard_progress:10,  signoffMode:'auto',   _seenIntake:true },
+  { id:'r4', title:'Analytics Dashboard', owner:'Tom R.',    risk:'',                   dashboard_stage:'Ready',    dashboard_progress:100, signoffMode:'manual', _seenIntake:true },
 ];
 
 const MOCK_TICKETS = {
@@ -487,6 +752,10 @@ let state = {
   groupSignedOff:{},
   approvals:     {},
   ticketCache:   null,
+  // AI Intake
+  intakeAnswers: null,     // saved intake form answers {goal, metrics, tech, deps, compliance, timeline, teams, freetext}
+  aiFilledItems: {},       // aiFilledItems[gateId][groupId][itemId] = true  — tracks AI-applied fills
+  _intakeFillMap: null,   // temporary fill map computed during evaluation, applied on confirm
 };
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────
@@ -496,6 +765,7 @@ function showView(id) {
   if (id === 'summary')   renderSummary();
   if (id === 'dashboard') loadDashboard();
   if (id === 'progress')  renderProgress();
+  if (id === 'create')    initCreateView();
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────
@@ -510,10 +780,20 @@ function loadDashboard() {
     const bar  = pct===100?'bg-green-500':pct>=80?'bg-blue-500':pct>=50?'bg-amber-400':'bg-red-500';
     const pill = stageColors[req.dashboard_stage]||'bg-gray-100 text-gray-600';
     const mc   = modeColors[req.signoffMode]||'bg-gray-100 text-gray-500 border-gray-200';
+    // Feature type pill
+    const ftColor = (req.featureTypeId && FEATURE_TYPE_PILL_COLORS[req.featureTypeId]) || '';
+    const ftPill  = req.featureTypeId
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${ftColor}">
+           <span>${req.featureTypeIcon||''}</span>${req.featureTypeLabel||''}
+         </span>`
+      : '<span class="text-gray-300 text-xs">—</span>';
     const tr   = document.createElement('tr');
     tr.className = 'hover:bg-gray-50 transition-colors';
     tr.innerHTML = `
-      <td class="px-5 py-4 font-medium text-gray-900">${req.title}</td>
+      <td class="px-5 py-4">
+        <p class="font-medium text-gray-900">${req.title}</p>
+      </td>
+      <td class="px-5 py-4">${ftPill}</td>
       <td class="px-5 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pill}">${req.dashboard_stage}</span></td>
       <td class="px-5 py-4">
         <div class="flex items-center gap-2">
@@ -554,6 +834,9 @@ function loadRequest(id) {
   state.groupStatus   = blank.groupStatus;
   state.groupSignedOff= blank.groupSignedOff;
   state.approvals     = blank.approvals;
+  state.aiFilledItems = {};
+  state.intakeAnswers = null;
+  state._intakeFillMap= null;
 
   const savedChecks = INITIAL_CHECKS[id] || {};
   allGateKeys().forEach(b => {
@@ -570,18 +853,259 @@ function loadRequest(id) {
     });
   });
 
-  // Set breadcrumb title + signoff mode badge
-  const title = req ? req.title : '—';
-  document.getElementById('wf-breadcrumb-title').textContent = title;
-  const badge = document.getElementById('wf-signoff-mode-badge');
-  badge.textContent = state.signoffMode==='auto' ? '⚡ Auto-detect' : '✍ Manual sign-off';
-  badge.className = state.signoffMode==='auto'
-    ? 'text-xs px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 font-medium border border-teal-200'
-    : 'text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-medium border border-violet-200';
+  // Route: returning visit → progress summary; first-ever open → intake form
+  if (req && req._seenIntake) {
+    showResumeSummary();
+  } else {
+    showIntakeForm('open');
+  }
+}
 
-  buildGateNav();
-  switchGate('business');
-  showView('workflow');
+// ── CLASSIFICATION ────────────────────────────────────────────────────────
+
+// Module-level classification state
+let _classificationTypeId    = null;  // currently selected FEATURE_TYPES id
+let _classificationOverrides = {};    // { [questionId]: 'yes'|'no' }
+let _classificationVerdict   = null;  // 'exempt' | 'initiate' | 'always-initiate' | null
+
+// Called once when view-create is first shown; renders the type selector grid
+function initCreateView() {
+  _classificationTypeId    = null;
+  _classificationOverrides = {};
+  _classificationVerdict   = null;
+  document.getElementById('create-override-questions').classList.add('hidden');
+  document.getElementById('create-verdict').classList.add('hidden');
+  document.getElementById('create-details-section').classList.add('hidden');
+  document.getElementById('create-type-grid').innerHTML = buildTypeGrid();
+}
+
+function buildTypeGrid() {
+  return FEATURE_TYPES.map(t => `
+    <button type="button" id="type-card-${t.id}"
+      onclick="onFeatureTypeSelect('${t.id}')"
+      class="type-card text-left border border-gray-200 rounded-xl p-3.5 hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-base leading-none">${t.icon}</span>
+        <span class="text-sm font-medium text-gray-800 leading-snug">${t.label}</span>
+      </div>
+      <p class="text-xs text-gray-400 leading-snug line-clamp-2">${t.description}</p>
+    </button>`
+  ).join('');
+}
+
+function onFeatureTypeSelect(typeId) {
+  _classificationTypeId    = typeId;
+  _classificationOverrides = {};
+  _classificationVerdict   = null;
+
+  // Highlight selected card, reset others
+  document.querySelectorAll('.type-card').forEach(card => {
+    const isSelected = card.id === `type-card-${typeId}`;
+    card.className = isSelected
+      ? 'type-card text-left border border-blue-500 bg-blue-50 rounded-xl p-3.5 transition-all focus:outline-none ring-2 ring-blue-200'
+      : 'type-card text-left border border-gray-200 rounded-xl p-3.5 hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400';
+  });
+
+  const type = FEATURE_TYPES.find(t => t.id === typeId);
+  if (!type) return;
+
+  // Always-initiate types skip straight to showing details
+  if (type.alwaysInitiate) {
+    document.getElementById('create-override-questions').classList.add('hidden');
+    _classificationVerdict = 'always-initiate';
+    renderVerdict();
+    return;
+  }
+
+  // Render override questions if any
+  if (type.overrideQuestions.length > 0) {
+    renderOverrideQuestions(type);
+    document.getElementById('create-override-questions').classList.remove('hidden');
+  } else {
+    document.getElementById('create-override-questions').classList.add('hidden');
+    // No override questions — verdict is simply defaultExempt
+    _classificationVerdict = type.defaultExempt ? 'exempt' : 'initiate';
+    renderVerdict();
+  }
+}
+
+function renderOverrideQuestions(type) {
+  const container = document.getElementById('create-override-questions');
+  let html = `
+    <div class="flex items-center gap-2 pb-3 border-b border-gray-100 mb-1">
+      <span class="text-base">${type.icon}</span>
+      <div>
+        <p class="text-sm font-semibold text-gray-800">${type.label}</p>
+        <p class="text-xs text-gray-400 mt-0.5">${type.description}</p>
+      </div>
+    </div>`;
+
+  // Examples
+  if (type.examples && type.examples.length) {
+    html += `<div class="mb-3">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Examples</p>
+      <ul class="space-y-0.5">
+        ${type.examples.map(e => `<li class="text-xs text-gray-500 flex items-start gap-1.5"><span class="text-gray-300 shrink-0 mt-0.5">•</span>${e}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  // Override questions
+  html += `<div class="space-y-4 pt-1">`;
+  type.overrideQuestions.forEach((q, i) => {
+    html += `
+      <div>
+        <p class="text-sm font-medium text-gray-800 mb-1">${q.text}</p>
+        ${q.hint ? `<p class="text-xs text-gray-400 mb-2">${q.hint}</p>` : ''}
+        <div class="flex gap-2">
+          <label class="flex-1 flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+            <input type="radio" name="override-q-${q.id}" value="no"
+              onchange="onOverrideAnswer('${type.id}','${q.id}','no')"
+              class="text-blue-600 focus:ring-blue-500" />
+            <span class="text-sm text-gray-700">No</span>
+          </label>
+          <label class="flex-1 flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-300 transition-colors has-[:checked]:border-red-400 has-[:checked]:bg-red-50">
+            <input type="radio" name="override-q-${q.id}" value="yes"
+              onchange="onOverrideAnswer('${type.id}','${q.id}','yes')"
+              class="text-red-500 focus:ring-red-400" />
+            <span class="text-sm text-gray-700">Yes</span>
+          </label>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+
+  container.innerHTML = html;
+  // Reset verdict until questions answered
+  document.getElementById('create-verdict').classList.add('hidden');
+  document.getElementById('create-details-section').classList.add('hidden');
+}
+
+function onOverrideAnswer(typeId, questionId, answer) {
+  _classificationOverrides[questionId] = answer;
+  const type = FEATURE_TYPES.find(t => t.id === typeId);
+  if (!type) return;
+
+  // Check if all override questions have been answered
+  const allAnswered = type.overrideQuestions.every(q => _classificationOverrides[q.id]);
+  if (!allAnswered) return;
+
+  // Any "yes" on a yesOverrides question → flip to initiate
+  const flipped = type.overrideQuestions.some(
+    q => q.yesOverrides && _classificationOverrides[q.id] === 'yes'
+  );
+
+  _classificationVerdict = flipped ? 'initiate' : (type.defaultExempt ? 'exempt' : 'initiate');
+  renderVerdict();
+}
+
+function renderVerdict() {
+  const verdictEl  = document.getElementById('create-verdict');
+  const detailsEl  = document.getElementById('create-details-section');
+  const type       = FEATURE_TYPES.find(t => t.id === _classificationTypeId);
+  verdictEl.classList.remove('hidden');
+
+  // Find the triggered override question id (if any)
+  let triggeredOverrideId = null;
+  if (type) {
+    const hit = type.overrideQuestions.find(
+      q => q.yesOverrides && _classificationOverrides[q.id] === 'yes'
+    );
+    if (hit) triggeredOverrideId = hit.id;
+  }
+
+  if (_classificationVerdict === 'exempt') {
+    const msg = EXEMPTION_MESSAGES[_classificationTypeId] || 'This change does not require project initiation.';
+    verdictEl.innerHTML = `
+      <div class="rounded-xl border border-green-200 bg-green-50 p-5">
+        <div class="flex items-start gap-3 mb-3">
+          <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-green-800">Project initiation not required</p>
+            <p class="text-xs text-green-700 mt-1 leading-relaxed">${msg}</p>
+          </div>
+        </div>
+        <div class="flex gap-2.5 pt-1">
+          <button onclick="acknowledgeExemption()"
+            class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+            Acknowledge &amp; Exit
+          </button>
+          <button onclick="proceedDespiteExemption()"
+            class="flex-1 bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+            Proceed with initiation anyway
+          </button>
+        </div>
+      </div>`;
+    detailsEl.classList.add('hidden');
+
+  } else if (_classificationVerdict === 'always-initiate') {
+    const msg        = type?.alwaysInitiateReason || 'This change requires project initiation.';
+    const isUnsure   = _classificationTypeId === 'unsure';
+    const titleText  = isUnsure ? 'Initiation recommended' : 'Project initiation required';
+    const iconColor  = isUnsure ? 'bg-amber-100' : 'bg-blue-100';
+    const iconStroke = isUnsure ? 'text-amber-500' : 'text-blue-600';
+    const borderCls  = isUnsure ? 'border-amber-200 bg-amber-50' : 'border-blue-200 bg-blue-50';
+    const titleCls   = isUnsure ? 'text-amber-800' : 'text-blue-800';
+    const msgCls     = isUnsure ? 'text-amber-700' : 'text-blue-700';
+    verdictEl.innerHTML = `
+      <div class="rounded-xl border ${borderCls} p-5">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full ${iconColor} flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 ${iconStroke}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold ${titleCls}">${titleText}</p>
+            <p class="text-xs ${msgCls} mt-1 leading-relaxed">${msg}</p>
+          </div>
+        </div>
+      </div>`;
+    detailsEl.classList.remove('hidden');
+
+  } else {
+    // 'initiate' — either non-exempt type or override flipped it
+    const msg = triggeredOverrideId
+      ? (OVERRIDE_MESSAGES[triggeredOverrideId] || 'This change requires project initiation.')
+      : 'This type of change requires project initiation through ReadyOps.';
+    verdictEl.innerHTML = `
+      <div class="rounded-xl border border-blue-200 bg-blue-50 p-5">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-blue-800">Project initiation required</p>
+            <p class="text-xs text-blue-700 mt-1 leading-relaxed">${msg}</p>
+          </div>
+        </div>
+      </div>`;
+    detailsEl.classList.remove('hidden');
+  }
+
+  // Smooth scroll to verdict
+  setTimeout(() => verdictEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+function acknowledgeExemption() {
+  showView('dashboard');
+}
+
+function proceedDespiteExemption() {
+  // User chose to override the exemption — show the form details anyway
+  _classificationVerdict = 'initiate-override';
+  const type = FEATURE_TYPES.find(t => t.id === _classificationTypeId);
+  const verdictEl = document.getElementById('create-verdict');
+  verdictEl.innerHTML = `
+    <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
+      <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <p class="text-xs text-amber-700 leading-relaxed">
+        <span class="font-semibold">Proceeding with initiation.</span>
+        This change was classified as exempt (${type ? type.label : ''}) but you have chosen to initiate a readiness review. Fill in the details below.
+      </p>
+    </div>`;
+  document.getElementById('create-details-section').classList.remove('hidden');
+  setTimeout(() => document.getElementById('create-details-section').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 }
 
 // ── CREATE REQUEST ────────────────────────────────────────────────────────
@@ -595,13 +1119,559 @@ function submitCreateRequest() {
   const err     = document.getElementById('create-error');
   if (!title||!goal||!metrics||!owner||!quarter) { err.classList.remove('hidden'); return; }
   err.classList.add('hidden');
+
+  // Resolve classification metadata
+  const ftType            = FEATURE_TYPES.find(t => t.id === _classificationTypeId);
+  const classificationOverrideApplied = _classificationVerdict === 'initiate-override';
+  const triggeredOverrideId = ftType
+    ? (ftType.overrideQuestions.find(q => q.yesOverrides && _classificationOverrides[q.id] === 'yes')?.id || null)
+    : null;
+
   const newId = 'new-'+Date.now();
-  requests.push({ id:newId, title, owner, risk:'', dashboard_stage:'Business', dashboard_progress:0, signoffMode:mode });
-  ['create-title','create-goal','create-metrics'].forEach(id => document.getElementById(id).value='');
+  requests.push({
+    id:              newId,
+    title,
+    owner,
+    risk:            '',
+    dashboard_stage: 'Business',
+    dashboard_progress: 0,
+    signoffMode:     mode,
+    // Classification
+    featureTypeId:    _classificationTypeId || null,
+    featureTypeLabel: ftType ? ftType.label : null,
+    featureTypeIcon:  ftType ? ftType.icon  : null,
+    classificationExemptOverridden: classificationOverrideApplied,
+    classificationOverrideReason:   triggeredOverrideId ? OVERRIDE_MESSAGES[triggeredOverrideId] : null,
+  });
+
+  // Reset form fields
+  ['create-title','create-metrics'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('create-goal').value = '';
   document.getElementById('create-owner').value='';
   document.getElementById('create-quarter').value='';
   document.querySelector('input[name="signoff-mode"][value="auto"]').checked=true;
-  loadRequest(newId);
+
+  // Initialise state for the new request then open intake form
+  state.activeRequest = newId;
+  state.signoffMode = mode;
+  const blank = blankState();
+  state.checks        = blank.checks;
+  state.notes         = blank.notes;
+  state.groupStatus   = blank.groupStatus;
+  state.groupSignedOff= blank.groupSignedOff;
+  state.approvals     = blank.approvals;
+  state.aiFilledItems = {};
+  state.intakeAnswers = null;
+  state._intakeFillMap= null;
+  state.ticketCache   = null;
+
+  // Pre-seed intake goal from the create form's business goal field
+  showIntakeForm('create', goal);
+  document.getElementById('create-goal').value = '';
+}
+
+// ── RESUME SUMMARY (returning visit entry point) ──────────────────────────
+function showResumeSummary() {
+  const req = requests.find(r => r.id === state.activeRequest);
+
+  // Nav header
+  document.getElementById('intake-heading').textContent    = req ? req.title : 'Feature';
+  document.getElementById('intake-subheading').textContent = 'Pick up where you left off, or run an AI evaluation to pre-fill remaining items.';
+  document.getElementById('intake-mode-badge').textContent  = '📋 Resuming';
+  document.getElementById('intake-mode-badge').className   = 'text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-medium border border-gray-200';
+  document.getElementById('intake-back-btn').textContent    = '← Dashboard';
+  document.getElementById('intake-back-btn').setAttribute('onclick', "showView('dashboard')");
+
+  // Layout: hide form + results, show resume panel
+  document.getElementById('intake-form-col').classList.add('hidden');
+  document.getElementById('intake-results-col').classList.add('hidden');
+  document.getElementById('intake-resume-panel').classList.remove('hidden');
+
+  renderResumeSummary();
+  showView('intake');
+}
+
+function renderResumeSummary() {
+  const req = requests.find(r => r.id === state.activeRequest);
+  if (!req) return;
+
+  // Feature header
+  document.getElementById('resume-feature-title').textContent = req.title;
+  document.getElementById('resume-feature-meta').textContent  = `${req.owner} · Active gate: ${req.dashboard_stage}`;
+
+  // Signoff badge
+  const sb = document.getElementById('resume-signoff-badge');
+  if (req.signoffMode === 'manual') {
+    sb.textContent  = '✍ Manual sign-off';
+    sb.className    = 'text-xs px-2.5 py-1 rounded-full font-medium border shrink-0 mt-0.5 bg-violet-50 text-violet-700 border-violet-200';
+  } else {
+    sb.textContent  = '⚡ Auto-detect';
+    sb.className    = 'text-xs px-2.5 py-1 rounded-full font-medium border shrink-0 mt-0.5 bg-teal-50 text-teal-700 border-teal-200';
+  }
+
+  // Overall progress
+  let totalChecked = 0, totalItems = 0, totalReqMissing = 0;
+  allGateKeys().forEach(b => groupKeysFor(b).forEach(g => {
+    const items = allItems(b, g);
+    totalItems += items.length;
+    items.forEach(i => {
+      if (state.checks[b][g][i.id]) totalChecked++;
+      else if (i.required)          totalReqMissing++;
+    });
+  }));
+  const overallPct = totalItems > 0 ? Math.round(totalChecked / totalItems * 100) : 0;
+  const barColor   = overallPct === 100 ? 'bg-green-500' : overallPct >= 50 ? 'bg-blue-500' : overallPct >= 20 ? 'bg-amber-400' : 'bg-red-400';
+
+  document.getElementById('resume-overall-pct').textContent   = overallPct + '%';
+  document.getElementById('resume-overall-bar').style.width   = overallPct + '%';
+  document.getElementById('resume-overall-bar').className     = `h-2 rounded-full transition-all duration-500 ${barColor}`;
+  document.getElementById('resume-overall-counts').textContent = `${totalChecked} of ${totalItems} items checked`;
+
+  // Per-gate rows
+  const gateConfig = {
+    business:  { icon:'🏢', label:'Business' },
+    product:   { icon:'📦', label:'Product' },
+    tech:      { icon:'⚙️',  label:'Tech' },
+    marketing: { icon:'📣', label:'Marketing' },
+  };
+  let gateRowsHtml = '';
+  allGateKeys().forEach(b => {
+    const cfg = gateConfig[b];
+    let gChecked = 0, gTotal = 0, gReqMissing = 0;
+    groupKeysFor(b).forEach(g => {
+      const items = allItems(b, g);
+      gTotal += items.length;
+      items.forEach(i => {
+        if (state.checks[b][g][i.id]) gChecked++;
+        else if (i.required)          gReqMissing++;
+      });
+    });
+    const pct    = gTotal > 0 ? Math.round(gChecked / gTotal * 100) : 0;
+    const status = state.groupStatus[b] ? (
+      groupKeysFor(b).every(g => state.groupStatus[b][g] === 'complete') ? 'complete'
+      : groupKeysFor(b).some(g => state.groupStatus[b][g] !== 'not-started') ? 'in-progress'
+      : 'not-started'
+    ) : 'not-started';
+
+    const statusLabel = status === 'complete' ? 'Complete' : status === 'in-progress' ? 'In Progress' : 'Not Started';
+    const statusCls   = status === 'complete'
+      ? 'bg-green-50 text-green-700 border-green-200'
+      : status === 'in-progress'
+      ? 'bg-amber-50 text-amber-700 border-amber-200'
+      : 'bg-gray-50 text-gray-500 border-gray-200';
+    const barCls = status === 'complete' ? 'bg-green-400' : status === 'in-progress' ? 'bg-amber-400' : 'bg-gray-200';
+
+    const missingHtml = gReqMissing > 0
+      ? `<span class="text-xs text-amber-600 font-medium">${gReqMissing} required missing</span>`
+      : `<span class="text-xs text-gray-400">${gChecked}/${gTotal} items</span>`;
+
+    gateRowsHtml += `
+      <div class="px-6 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer" onclick="enterWorkflowAtGate('${b}')">
+        <span class="text-base shrink-0 w-5 text-center">${cfg.icon}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-sm font-medium text-gray-800">${cfg.label}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full border font-medium ${statusCls}">${statusLabel}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+              <div class="${barCls} h-full rounded-full transition-all duration-500" style="width:${pct}%"></div>
+            </div>
+            <span class="text-xs text-gray-500 font-medium shrink-0 w-8 text-right">${pct}%</span>
+          </div>
+          <div class="mt-1">${missingHtml}</div>
+        </div>
+        <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </div>`;
+  });
+  document.getElementById('resume-gate-rows').innerHTML = gateRowsHtml;
+
+  // Required missing notice
+  const missingNotice = document.getElementById('resume-missing-notice');
+  const missingText   = document.getElementById('resume-missing-text');
+  if (totalReqMissing > 0) {
+    missingText.textContent = `${totalReqMissing} required item${totalReqMissing > 1 ? 's' : ''} still need${totalReqMissing === 1 ? 's' : ''} to be completed`;
+    missingNotice.classList.remove('hidden');
+  } else {
+    missingNotice.classList.add('hidden');
+  }
+
+  // Prior AI note
+  const priorNote = document.getElementById('resume-prior-ai-note');
+  if (state.intakeAnswers) {
+    priorNote.classList.remove('hidden');
+  } else {
+    priorNote.classList.add('hidden');
+  }
+}
+
+// Navigate straight to a specific gate from the resume summary
+function enterWorkflowAtGate(gateId) {
+  const req = requests.find(r => r.id === state.activeRequest);
+  if (req) req._seenIntake = true;
+  const title = req ? req.title : '—';
+  document.getElementById('wf-breadcrumb-title').textContent = title;
+  const badge = document.getElementById('wf-signoff-mode-badge');
+  badge.textContent = state.signoffMode === 'auto' ? '⚡ Auto-detect' : '✍ Manual sign-off';
+  badge.className   = state.signoffMode === 'auto'
+    ? 'text-xs px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 font-medium border border-teal-200'
+    : 'text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-medium border border-violet-200';
+  buildGateNav();
+  switchGate(gateId);
+  showView('workflow');
+}
+
+// ── AI INTAKE FORM ────────────────────────────────────────────────────────
+// mode: 'create' | 'open' | 'reevaluate'
+// prefilledGoal: optional string to seed the goal field from the create form
+function showIntakeForm(mode, prefilledGoal) {
+  const req = requests.find(r => r.id === state.activeRequest);
+  const title = req ? req.title : 'this feature';
+
+  // Always restore form layout (hide resume panel, show form col)
+  document.getElementById('intake-resume-panel').classList.add('hidden');
+  document.getElementById('intake-form-col').classList.remove('hidden');
+  document.getElementById('intake-mode-badge').textContent = '✦ AI Intake';
+  document.getElementById('intake-mode-badge').className   = 'text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200';
+
+  const heading    = document.getElementById('intake-heading');
+  const subheading = document.getElementById('intake-subheading');
+  const backBtn    = document.getElementById('intake-back-btn');
+
+  if (mode === 'reevaluate') {
+    heading.textContent    = 'Re-run AI Evaluation';
+    subheading.textContent = `Update your context and re-evaluate the checklist for "${title}".`;
+    backBtn.textContent    = '← Back to Summary';
+    backBtn.setAttribute('onclick', 'showResumeSummary()');
+  } else if (mode === 'create') {
+    heading.textContent    = 'AI-Assisted Intake';
+    subheading.textContent = `Describe "${title}" so the AI can evaluate and pre-fill your readiness checklist.`;
+    backBtn.textContent    = '← Back';
+    backBtn.setAttribute('onclick', "showView('create')");
+  } else {
+    heading.textContent    = 'AI-Assisted Intake';
+    subheading.textContent = `Describe "${title}" so the AI can evaluate and pre-fill your readiness checklist.`;
+    backBtn.textContent = '← Dashboard';
+    backBtn.setAttribute('onclick', "showView('dashboard')");
+  }
+
+  // Reset results panel
+  document.getElementById('intake-results-col').classList.add('hidden');
+  document.getElementById('intake-form-error').classList.add('hidden');
+  resetEvaluateButton();
+
+  // Pre-fill from saved answers if re-evaluating
+  const saved = state.intakeAnswers;
+  if (saved) {
+    document.getElementById('intake-goal').value       = saved.goal       || '';
+    document.getElementById('intake-metrics').value    = saved.metrics    || '';
+    document.getElementById('intake-tech').value       = saved.tech       || '';
+    document.getElementById('intake-deps').value       = saved.deps       || '';
+    document.getElementById('intake-compliance').value = saved.compliance || '';
+    document.getElementById('intake-freetext').value   = saved.freetext   || '';
+    const tlRadio = document.querySelector(`input[name="intake-timeline"][value="${saved.timeline||'medium'}"]`);
+    if (tlRadio) tlRadio.checked = true;
+    document.querySelectorAll('input[name="intake-teams"]').forEach(cb => {
+      cb.checked = (saved.teams || []).includes(cb.value);
+    });
+  } else {
+    document.getElementById('intake-goal').value       = prefilledGoal || '';
+    document.getElementById('intake-metrics').value    = '';
+    document.getElementById('intake-tech').value       = '';
+    document.getElementById('intake-deps').value       = '';
+    document.getElementById('intake-compliance').value = '';
+    document.getElementById('intake-freetext').value   = '';
+    document.querySelector('input[name="intake-timeline"][value="medium"]').checked = true;
+    document.querySelectorAll('input[name="intake-teams"]').forEach(cb => {
+      cb.checked = ['business','product','tech'].includes(cb.value);
+    });
+  }
+
+  showView('intake');
+}
+
+function intakeGoBack() { /* overridden by showIntakeForm via setAttribute */ }
+
+function resetEvaluateButton() {
+  const btn   = document.getElementById('intake-evaluate-btn');
+  const icon  = document.getElementById('intake-btn-icon');
+  const label = document.getElementById('intake-btn-label');
+  btn.disabled = false;
+  btn.className = 'w-full bg-blue-600 text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2';
+  icon.textContent  = '✦';
+  label.textContent = 'Evaluate & Auto-fill →';
+}
+
+function submitIntakeEvaluation() {
+  const goal = document.getElementById('intake-goal').value.trim();
+  const err  = document.getElementById('intake-form-error');
+  if (!goal) { err.classList.remove('hidden'); return; }
+  err.classList.add('hidden');
+
+  const answers = {
+    goal,
+    metrics:    document.getElementById('intake-metrics').value.trim(),
+    tech:       document.getElementById('intake-tech').value.trim(),
+    deps:       document.getElementById('intake-deps').value.trim(),
+    compliance: document.getElementById('intake-compliance').value.trim(),
+    freetext:   document.getElementById('intake-freetext').value.trim(),
+    timeline:   document.querySelector('input[name="intake-timeline"]:checked')?.value || 'medium',
+    teams:      [...document.querySelectorAll('input[name="intake-teams"]:checked')].map(cb => cb.value),
+  };
+  state.intakeAnswers = answers;
+
+  // Loading state
+  const btn   = document.getElementById('intake-evaluate-btn');
+  const icon  = document.getElementById('intake-btn-icon');
+  const label = document.getElementById('intake-btn-label');
+  btn.disabled  = true;
+  btn.className = 'w-full bg-gray-200 text-gray-500 px-5 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cursor-not-allowed';
+  icon.textContent  = '⟳';
+  label.textContent = 'AI is reviewing…';
+
+  setTimeout(() => {
+    const fillMap = buildIntakeFillMap(answers);
+    state._intakeFillMap = fillMap;
+    renderIntakeResults(fillMap, answers);
+    // Switch button to re-evaluate mode
+    const btn2 = document.getElementById('intake-evaluate-btn');
+    btn2.disabled  = false;
+    btn2.className = 'w-full bg-white text-blue-600 border border-blue-300 px-5 py-3 rounded-xl text-sm font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2';
+    document.getElementById('intake-btn-icon').textContent  = '↺';
+    document.getElementById('intake-btn-label').textContent = 'Re-evaluate →';
+  }, 1500);
+}
+
+function buildIntakeFillMap(answers) {
+  const fillMap = {};
+  const highTimeline  = answers.timeline === 'high';
+  const teams         = answers.teams || [];
+  const hasGoal       = answers.goal.length > 10;
+  const hasTech       = answers.tech.length > 10;
+  const hasCompliance = answers.compliance.length > 10;
+  const hasDeps       = answers.deps.length > 10;
+  const hasMetrics    = answers.metrics.length > 5;
+  const hasFreetext   = answers.freetext.length > 10;
+
+  function noteFrom(...parts) {
+    return parts.filter(Boolean).join(' — ').slice(0, 200) || 'Confirmed via AI intake evaluation.';
+  }
+
+  allGateKeys().forEach(b => {
+    if (!teams.includes(b)) return;
+    fillMap[b] = {};
+
+    groupKeysFor(b).forEach(g => {
+      fillMap[b][g] = {};
+      allItems(b, g).forEach(item => {
+        let note = null, confidence = null;
+
+        // ── Business ──────────────────────────────────────────
+        if (b === 'business') {
+          if (g === 'strategy') {
+            if      (item.id==='b-s1' && hasGoal)                         { note=noteFrom(answers.goal);                         confidence='high'; }
+            else if (item.id==='b-s2' && hasGoal)                         { note=noteFrom(answers.goal, answers.freetext||null); confidence='high'; }
+            else if (item.id==='b-s3' && hasMetrics)                      { note=noteFrom(answers.metrics);                      confidence='high'; }
+            else if (item.id==='b-s4' && !highTimeline && hasGoal)        { note=noteFrom(answers.goal);                         confidence='medium'; }
+          }
+          if (g === 'compliance') {
+            if      (item.id==='b-c1' && hasCompliance)                   { note=noteFrom(answers.compliance);                   confidence='high'; }
+            else if (item.id==='b-c2' && hasCompliance)                   { note=noteFrom(answers.compliance);                   confidence='high'; }
+            else if (item.id==='b-c3' && hasCompliance && !highTimeline)  { note=noteFrom(answers.compliance);                   confidence='medium'; }
+            else if (item.id==='b-c4' && hasFreetext && !highTimeline)    { note=noteFrom(answers.freetext);                     confidence='medium'; }
+          }
+          if (g === 'finance') {
+            if      (item.id==='b-f1' && hasGoal)                         { note=noteFrom(answers.goal);                         confidence='medium'; }
+            else if (item.id==='b-f2' && !highTimeline && hasGoal)        { note=noteFrom(answers.goal);                         confidence='medium'; }
+          }
+          if (g === 'stakeholders') {
+            if      (item.id==='b-st1' && hasGoal)                        { note=noteFrom(answers.goal);                         confidence='high'; }
+            else if (item.id==='b-st2' && !highTimeline)                  { note=noteFrom(answers.freetext||answers.goal);       confidence='medium'; }
+          }
+        }
+
+        // ── Product ───────────────────────────────────────────
+        if (b === 'product') {
+          if (g === 'userstories') {
+            if      (item.id==='p-u1' && hasGoal)                         { note=noteFrom(answers.goal);                         confidence='high'; }
+            else if (item.id==='p-u2' && hasGoal)                         { note=noteFrom(answers.goal, answers.freetext||null); confidence='high'; }
+            else if (item.id==='p-u3' && hasMetrics)                      { note=noteFrom(answers.metrics);                      confidence='high'; }
+            else if (item.id==='p-u4' && hasFreetext && !highTimeline)    { note=noteFrom(answers.freetext);                     confidence='medium'; }
+          }
+          if (g === 'design') {
+            if      (item.id==='p-d1' && hasGoal)                         { note=noteFrom(answers.goal);                         confidence='medium'; }
+            else if (item.id==='p-d2' && !highTimeline && hasGoal)        { note=noteFrom(answers.goal);                         confidence='medium'; }
+          }
+          if (g === 'edgecases') {
+            if      (item.id==='p-e1' && hasFreetext)                     { note=noteFrom(answers.freetext);                     confidence='medium'; }
+            else if (item.id==='p-e2' && hasDeps)                         { note=noteFrom(answers.deps);                         confidence='medium'; }
+          }
+        }
+
+        // ── Tech ──────────────────────────────────────────────
+        if (b === 'tech') {
+          if (g === 'architecture') {
+            if      (item.id==='t-a1' && hasTech)                         { note=noteFrom(answers.tech);                         confidence='high'; }
+            else if (item.id==='t-a2' && hasTech)                         { note=noteFrom(answers.tech);                         confidence='high'; }
+            else if (item.id==='t-a3' && hasDeps)                         { note=noteFrom(answers.deps);                         confidence='medium'; }
+            else if (item.id==='t-a4' && hasTech && !highTimeline)        { note=noteFrom(answers.tech);                         confidence='medium'; }
+          }
+          if (g === 'security') {
+            if      (item.id==='t-sec1' && hasCompliance)                 { note=noteFrom(answers.compliance);                   confidence='high'; }
+            else if (item.id==='t-sec2' && hasTech)                       { note=noteFrom(answers.tech);                         confidence='medium'; }
+            else if (item.id==='t-sec3' && hasCompliance && !highTimeline){ note=noteFrom(answers.compliance);                   confidence='medium'; }
+          }
+          if (g === 'backend') {
+            if      (item.id==='t-be1' && hasTech)                        { note=noteFrom(answers.tech);                         confidence='high'; }
+            else if (item.id==='t-be2' && hasDeps)                        { note=noteFrom(answers.deps);                         confidence='medium'; }
+            else if (item.id==='t-be3' && hasTech && !highTimeline)       { note=noteFrom(answers.tech);                         confidence='medium'; }
+          }
+          if (g === 'frontend') {
+            if      (item.id==='t-fe1' && hasGoal)                        { note=noteFrom(answers.goal);                         confidence='medium'; }
+            else if (item.id==='t-fe2' && !highTimeline)                  { note=noteFrom(answers.tech||answers.goal);           confidence='medium'; }
+          }
+          if (g === 'qa') {
+            if      (item.id==='t-qa1' && hasMetrics)                     { note=noteFrom(answers.metrics);                      confidence='medium'; }
+            else if (item.id==='t-qa2' && !highTimeline)                  { note=noteFrom(answers.goal);                         confidence='medium'; }
+          }
+          if (g === 'techops') {
+            if      (item.id==='t-o1' && hasTech)                         { note=noteFrom(answers.tech);                         confidence='medium'; }
+            else if (item.id==='t-o3' && hasDeps)                         { note=noteFrom(answers.deps);                         confidence='medium'; }
+          }
+        }
+
+        // ── Marketing ─────────────────────────────────────────
+        if (b === 'marketing') {
+          if (g === 'marketing') {
+            if      (item.id==='m1' && hasGoal)                           { note=noteFrom(answers.goal);                         confidence='high'; }
+            else if (item.id==='m2' && hasMetrics)                        { note=noteFrom(answers.metrics);                      confidence='high'; }
+            else if (item.id==='m3' && hasFreetext && !highTimeline)      { note=noteFrom(answers.freetext);                     confidence='medium'; }
+          }
+        }
+
+        if (note && confidence) {
+          const isRequired = item.required;
+          const shouldCheck = confidence === 'high' || (!isRequired);
+          fillMap[b][g][item.id] = { note, confidence, checked: shouldCheck };
+        }
+      });
+    });
+  });
+
+  return fillMap;
+}
+
+function renderIntakeResults(fillMap, answers) {
+  const resultsCol = document.getElementById('intake-results-col');
+  const summaryEl  = document.getElementById('intake-results-summary');
+  const gatesEl    = document.getElementById('intake-results-gates');
+
+  let totalFilled = 0, totalItems = 0;
+  allGateKeys().forEach(b => groupKeysFor(b).forEach(g => {
+    totalItems += allItems(b, g).length;
+    totalFilled += Object.keys((fillMap[b]||{})[g] || {}).length;
+  }));
+
+  summaryEl.textContent = `${totalFilled} of ${totalItems} checklist items can be pre-filled based on your answers.`;
+
+  const gateLabels = { business:'🏢 Business', product:'📦 Product', tech:'⚙️ Tech', marketing:'📣 Marketing' };
+  let gatesHtml = '';
+  allGateKeys().forEach(b => {
+    const gMap = fillMap[b] || {};
+    let gateFilled = 0, gateTotal = 0;
+    groupKeysFor(b).forEach(g => {
+      gateTotal += allItems(b, g).length;
+      gateFilled += Object.keys(gMap[g]||{}).length;
+    });
+    const inScope = (answers.teams||[]).includes(b);
+    if (!inScope) {
+      gatesHtml += `<div class="flex items-center justify-between py-1.5 opacity-40">
+        <span class="text-xs text-gray-500">${gateLabels[b]}</span>
+        <span class="text-xs text-gray-400 italic">Excluded</span>
+      </div>`;
+      return;
+    }
+    const pct       = gateTotal > 0 ? Math.round(gateFilled / gateTotal * 100) : 0;
+    const confLabel = pct >= 60 ? 'High' : pct >= 30 ? 'Medium' : 'Low';
+    const confColor = pct >= 60 ? 'text-green-600 bg-green-50 border-green-200'
+                    : pct >= 30 ? 'text-amber-600 bg-amber-50 border-amber-200'
+                    :             'text-gray-500 bg-gray-50 border-gray-200';
+    const barColor  = pct >= 60 ? 'bg-green-400' : pct >= 30 ? 'bg-amber-400' : 'bg-gray-300';
+    gatesHtml += `<div class="py-1.5">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-medium text-gray-700">${gateLabels[b]}</span>
+        <span class="text-xs font-medium px-1.5 py-0.5 rounded border ${confColor}">${confLabel}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div class="${barColor} h-full rounded-full transition-all" style="width:${pct}%"></div>
+        </div>
+        <span class="text-xs text-gray-400 shrink-0">${gateFilled}/${gateTotal}</span>
+      </div>
+    </div>`;
+  });
+  gatesEl.innerHTML = gatesHtml;
+  resultsCol.classList.remove('hidden');
+}
+
+function applyIntakeFills() {
+  const fillMap = state._intakeFillMap;
+  if (!fillMap) return;
+
+  state.aiFilledItems = {};
+  allGateKeys().forEach(b => {
+    state.aiFilledItems[b] = {};
+    groupKeysFor(b).forEach(g => {
+      state.aiFilledItems[b][g] = {};
+      const gMap = (fillMap[b]||{})[g] || {};
+      Object.entries(gMap).forEach(([itemId, fill]) => {
+        if (!state.notes[b])    state.notes[b]    = {};
+        if (!state.notes[b][g]) state.notes[b][g] = {};
+        if (fill.note) state.notes[b][g][itemId] = fill.note;
+        if (fill.checked) {
+          state.checks[b][g][itemId] = true;
+          state.aiFilledItems[b][g][itemId] = true;
+        }
+      });
+    });
+    groupKeysFor(b).forEach(g => recomputeGroupStatus(b, g, false));
+  });
+
+  enterWorkflow();
+}
+
+function skipIntakeAndProceed() {
+  enterWorkflow();
+}
+
+function enterWorkflow() {
+  const req = requests.find(r => r.id === state.activeRequest);
+  if (req) req._seenIntake = true;   // mark so future opens route to summary
+  const title = req ? req.title : '—';
+  document.getElementById('wf-breadcrumb-title').textContent = title;
+  const badge = document.getElementById('wf-signoff-mode-badge');
+  badge.textContent = state.signoffMode==='auto' ? '⚡ Auto-detect' : '✍ Manual sign-off';
+  badge.className   = state.signoffMode==='auto'
+    ? 'text-xs px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 font-medium border border-teal-200'
+    : 'text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-medium border border-violet-200';
+
+  buildGateNav();
+  switchGate('business');
+  showView('workflow');
+
+  const totalFilled = allGateKeys().reduce((acc, b) =>
+    acc + groupKeysFor(b).reduce((a2, g) =>
+      a2 + Object.values((state.aiFilledItems[b]||{})[g]||{}).filter(Boolean).length, 0), 0);
+
+  if (totalFilled > 0) {
+    setTimeout(() => {
+      aiHistory.unshift({
+        role:'ai', type:'suggestion',
+        text:`✦ AI pre-filled ${totalFilled} checklist item${totalFilled>1?'s':''} based on your intake answers. Review each gate to confirm, adjust or override the suggestions.`
+      });
+      renderAIMessages();
+    }, 400);
+  }
 }
 
 // ── RENDER CHECKLIST ──────────────────────────────────────────────────────
@@ -629,15 +1699,18 @@ function renderGroupChecklist(gateId, groupId) {
 
   html += `<div class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 mt-3">`;
   items.forEach(item => {
-    const checked = state.checks[gateId][groupId][item.id] || false;
-    const note    = state.notes[gateId]?.[groupId]?.[item.id] || '';
-    html += `<div class="px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors" onclick="onChecklistItemFocus('${gateId}','${groupId}','${item.id}')">
+    const checked  = state.checks[gateId][groupId][item.id] || false;
+    const note     = state.notes[gateId]?.[groupId]?.[item.id] || '';
+    const aiFilled = (state.aiFilledItems[gateId]||{})[groupId]?.[item.id] || false;
+    const rowBg    = aiFilled ? 'bg-blue-50/60' : '';
+    const aiBadge  = aiFilled ? '<span class="ml-1.5 text-xs font-medium text-blue-500 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">✦ AI</span>' : '';
+    html += `<div class="px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors ${rowBg}" onclick="onChecklistItemFocus('${gateId}','${groupId}','${item.id}')">
       <div class="flex items-start gap-3">
         <input type="checkbox" id="chk-${item.id}" ${checked?'checked':''} onchange="onCheck('${gateId}','${groupId}','${item.id}',this.checked)"
           class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0 cursor-pointer" />
         <div class="flex-1 min-w-0">
           <label for="chk-${item.id}" class="text-sm font-medium text-gray-800 cursor-pointer ${checked?'line-through text-gray-400':''}">${item.label}</label>
-          ${item.required?'<span class="ml-2 text-xs font-medium text-red-500 bg-red-50 px-1.5 py-0.5 rounded">Required</span>':''}
+          ${item.required?'<span class="ml-2 text-xs font-medium text-red-500 bg-red-50 px-1.5 py-0.5 rounded">Required</span>':''}${aiBadge}
           <input type="text" value="${note}" placeholder="Add a note..." onchange="onNote('${gateId}','${groupId}','${item.id}',this.value)"
             class="mt-1.5 w-full text-xs border border-gray-100 rounded px-2 py-1 text-gray-500 placeholder-gray-300 focus:outline-none focus:border-blue-300 bg-gray-50" />
         </div>
