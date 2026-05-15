@@ -50,6 +50,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt: true,
     alwaysInitiate: false,
+    skipGates: ['product', 'marketing'],   // no customer-facing change; no user stories or GTM needed
     overrideQuestions: [
       {
         id:           'it-customer-impact',
@@ -75,6 +76,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt: true,
     alwaysInitiate: false,
+    skipGates: ['product', 'marketing'],   // tech-led internal change; no product design or GTM
     overrideQuestions: [
       {
         id:           'arch-customer-downtime',
@@ -105,6 +107,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt: true,
     alwaysInitiate: false,
+    skipGates: ['marketing'],   // staff-only system; no GTM campaign required
     overrideQuestions: [
       {
         id:           'internal-ui-external',
@@ -129,6 +132,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt: true,
     alwaysInitiate: false,
+    skipGates: ['marketing'],   // mandated change; no GTM campaign needed
     overrideQuestions: [
       {
         id:           'compliance-ux-impact',
@@ -154,6 +158,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt: true,
     alwaysInitiate: false,
+        skipGates:           [],   // full cross-functional review always required   // minor but may still need tech review; keep all gates
     overrideQuestions: [
       {
         id:           'minor-ui-broader-approval',
@@ -178,6 +183,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt: true,
     alwaysInitiate: false,
+    skipGates: ['marketing'],   // bug fixes don't need a GTM plan
     overrideQuestions: [
       {
         id:           'bugfix-new-capability',
@@ -203,6 +209,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt:       false,
     alwaysInitiate:      true,
+    skipGates:           [],
     alwaysInitiateReason: 'Changes with financial impact always require project initiation, regardless of scope or customer visibility. Financial changes need cross-functional oversight to manage risk.',
     overrideQuestions:   [],
   },
@@ -221,6 +228,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt:     false,
     alwaysInitiate:    false,
+    skipGates:         [],   // full gate coverage for new capabilities
     overrideQuestions: [],
   },
 
@@ -237,6 +245,7 @@ const FEATURE_TYPES = [
     ],
     defaultExempt:       false,
     alwaysInitiate:      true,
+    skipGates:           [],   // unknown scope — review all gates
     alwaysInitiateReason: 'When a change cannot be clearly classified, initiate a readiness review as a precaution. The review process will help clarify scope, ownership, and risk. You can update the classification later.',
     overrideQuestions:   [],
   },

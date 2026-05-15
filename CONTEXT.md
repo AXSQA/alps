@@ -19,21 +19,9 @@ The final gate, **Execution**, is not checklist-driven. It displays linked work 
 ```
 alps/
 ├── index_static.html      # PRIMARY PROTOTYPE — self-contained, no backend required
-├── index.html             # Live version — connects to Express API + PostgreSQL
 ├── checklist_config.js    # Single source of truth for all gates, groups, and checklist items
-├── server.js              # Express API entry point
-├── package.json           # Dependencies and npm scripts
-├── docker-compose.yml     # PostgreSQL 16 container (default creds: readyops/readyops/readyops)
-├── routes/
-│   ├── requests.js        # CRUD for readiness requests
-│   ├── checklist.js       # GET + PUT checklist item state
-│   ├── stages.js          # GET + PATCH stage progress
-│   ├── stageDefinitions.js
-│   └── tickets.js         # Execution tickets
-└── db/
-    ├── 01-schema.sql      # PostgreSQL schema (5 tables)
-    ├── 02-seed.sql        # Sample data (4 requests, 40 tickets, stage definitions)
-    └── pool.js            # pg connection pool
+├── feature_types.js       # Change classification taxonomy (feature types, exemption logic)
+└── CONTEXT.md             # This file — AI agent context
 ```
 
 ---
@@ -117,7 +105,7 @@ Each request starts with a specific set of checkboxes already ticked, representi
 
 ## 5. Checklist Architecture (`checklist_config.js`)
 
-This file is the **single source of truth** for all gates, groups, and items. Both `index_static.html` (via `<script src="checklist_config.js">`) and the live `index.html` reference it.
+This file is the **single source of truth** for all gates, groups, and items. Referenced by `index_static.html` via `<script src="checklist_config.js">`.
 
 ### Structure: Gates → Groups → Items
 
@@ -199,40 +187,17 @@ State is initialised from `INITIAL_CHECKS` when a request is opened, via `blankS
 
 ---
 
-## 7. `index_static.html` vs `index.html` — Key Differences
-
-| Aspect | `index_static.html` (prototype) | `index.html` (live) |
-|---|---|---|
-| Backend dependency | None — fully client-side | Requires Express + PostgreSQL |
-| Data source | `MOCK_REQUESTS` + `INITIAL_CHECKS` hardcoded in JS | Live DB via `fetch()` to `/api/…` |
-| Gate model | **5 gates**: Business, Product, Tech, Marketing, Execution | **4 stages**: Business, Product, Tech, Execution (no Marketing) |
-| Checklist structure | Gates → Groups → Items (sub-group tabs) | Flat checklist per stage |
-| Gate locking | No lock — all gates freely navigable | Sequential lock — each stage unlocks only when the previous is complete |
-| Sign-off mode | Per-request: auto or manual, with explicit sign-off button | Not present |
-| Dashboard columns | Feature, Active Gate, Progress, Owner, Risk, Sign-off Mode | Feature, Stage, Progress, Owner, Risk |
-| Summary/progress view | Per-gate grid with per-group cards (%, required missing, approve button) | 4 fixed stage cards |
-| AI Auditor | Present (mocked, collapses to strip) | Present (mocked, collapses to strip) |
-| OpenProject integration | Not present | Optional project dropdown on Create form; Refresh button on Execution stage |
-| Breadcrumb | Dynamic: `Feature › Gate Icon+Name › Group Name` | Static with clickable stage names |
-
----
-
-## 8. Tech Stack
+## 7. Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Frontend CSS | Tailwind CSS (CDN — `cdn.tailwindcss.com`) |
 | Frontend JS | Vanilla JavaScript, no framework |
 | Fonts | Google Fonts — Inter (400/500/600/700) |
-| Backend | Node.js 18+ / Express 5 |
-| Database | PostgreSQL 16 (via Docker/Podman) |
-| DB client | `pg` (node-postgres) |
-| Container | Podman (path hardcoded to WSL: `/mnt/c/Program Files/RedHat/Podman/podman.exe`) |
-| Dev reload | `node --watch` (built-in) |
 
 ---
 
-## 9. Known Prototype Characteristics
+## 8. Known Prototype Characteristics
 
 These are intentional shortcuts, not bugs:
 
@@ -240,9 +205,5 @@ These are intentional shortcuts, not bugs:
 2. **AI Auditor is fully mocked** — no real AI API is called anywhere in the codebase.
 3. **Owner list is hardcoded** — the Create form has a fixed `<select>` with 5 options: Priya S., James K., Aisha M., Tom R., Dana L.
 4. **Target quarters are hardcoded** — Q1–Q4 2026 only.
-5. **`index_static.html` and `index.html` have diverged** — the static prototype has a more advanced model (5 gates, sub-groups, sign-off modes) that is not reflected in the backend schema, which still uses the simpler 4-stage linear model from `index.html`.
-6. **No authentication** — single workspace, no login, sessions, or access control.
-7. **Key risks in the summary view are static strings** — five hardcoded sentences appear for every request regardless of actual state.
-8. **OpenProject integration is declared but not functional** — `op_project_id` is always `NULL` in seed data.
-9. **Podman path is not portable** — `package.json` scripts use an absolute Windows WSL path.
-10. **`index.html` has a mock fallback** — if the API call fails on dashboard load, it silently falls back to a `MOCK_REQUESTS` array hardcoded inside `index.html`. This is an intentional demo safety net.
+5. **No authentication** — single workspace, no login, sessions, or access control.
+6. **Key risks in the summary view are static strings** — five hardcoded sentences appear for every request regardless of actual state.
